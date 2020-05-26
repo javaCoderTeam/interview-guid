@@ -32,17 +32,19 @@
 
 8. #### [27. 移除元素](https://leetcode-cn.com/problems/remove-element/)
 
-9. #### [34. 在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
+## -------------------------------------------------------------------------------
 
-10. #### [56. 合并区间](https://leetcode-cn.com/problems/merge-intervals/)
+3. #### [34. 在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
 
-11. #### [238. 除自身以外数组的乘积](https://leetcode-cn.com/problems/product-of-array-except-self/)
+4. #### [56. 合并区间](https://leetcode-cn.com/problems/merge-intervals/)
 
-12. #### [448. 找到所有数组中消失的数字](https://leetcode-cn.com/problems/find-all-numbers-disappeared-in-an-array/)
+5. #### [238. 除自身以外数组的乘积](https://leetcode-cn.com/problems/product-of-array-except-self/)
 
-13. #### [581. 最短无序连续子数组](https://leetcode-cn.com/problems/shortest-unsorted-continuous-subarray/)
+6. #### [448. 找到所有数组中消失的数字](https://leetcode-cn.com/problems/find-all-numbers-disappeared-in-an-array/)
 
-14. #### [283. 移动零](https://leetcode-cn.com/problems/move-zeroes/) 双指针
+7. #### [581. 最短无序连续子数组](https://leetcode-cn.com/problems/shortest-unsorted-continuous-subarray/)
+
+8. #### [283. 移动零](https://leetcode-cn.com/problems/move-zeroes/) 双指针
 
 #  链表
 
@@ -118,7 +120,7 @@
 
 4. #### [3. 无重复字符的最长子串](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
 
-5. #### [5. 最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)
+5. #### [5. 最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/) ????
 
 
 
@@ -193,8 +195,6 @@
 
 # 回溯算法 
 
-1. 全排列  Permutations  [LeetCode-46]( https://leetcode-cn.com/problems/permutations/)
-
 2. 8皇后问题  Cal8queens [51. N皇后](https://leetcode-cn.com/problems/n-queens/) ？？？
 
 3. 最短路径问题 /backtrack/Mindist
@@ -203,7 +203,7 @@
 
 5. #### [39. 组合总和](https://leetcode-cn.com/problems/combination-sum/)
 
-6. #### [46. 全排列](https://leetcode-cn.com/problems/permutations/)
+6. #### [46. 全排列](https://leetcode-cn.com/problems/permutations/) ???
 
 7. #### [79. 单词搜索](https://leetcode-cn.com/problems/word-search/)
 
@@ -225,19 +225,19 @@
 
 7. #### [300. 最长上升子序列](https://leetcode-cn.com/problems/longest-increasing-subsequence/)
 
-8. #### [322. 零钱兑换](https://leetcode-cn.com/problems/coin-change/)
+8. [198. 打家劫舍](https://leetcode-cn.com/problems/house-robber/)
 
-9. #### [200. 岛屿数量](https://leetcode-cn.com/problems/number-of-islands/)
+9. #### [322. 零钱兑换](https://leetcode-cn.com/problems/coin-change/)
 
-10. #### [53. 最大子序和](https://leetcode-cn.com/problems/maximum-subarray/)
+10. #### [200. 岛屿数量](https://leetcode-cn.com/problems/number-of-islands/)
 
-11. #### [64. 最小路径和](https://leetcode-cn.com/problems/minimum-path-sum/)
+11. #### [53. 最大子序和](https://leetcode-cn.com/problems/maximum-subarray/)
 
-12. #### [72. 编辑距离](https://leetcode-cn.com/problems/edit-distance/) ***
+12. #### [64. 最小路径和](https://leetcode-cn.com/problems/minimum-path-sum/)
 
-13. #### [62. 不同路径](https://leetcode-cn.com/problems/unique-paths/)
+13. #### [72. 编辑距离](https://leetcode-cn.com/problems/edit-distance/) ***
 
-14. #### [198. 打家劫舍](https://leetcode-cn.com/problems/house-robber/)
+14. #### [62. 不同路径](https://leetcode-cn.com/problems/unique-paths/)
 
 15. #### [279. 完全平方数](https://leetcode-cn.com/problems/perfect-squares/)
 
