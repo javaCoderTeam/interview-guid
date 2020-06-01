@@ -27,28 +27,91 @@
 4.   [ Atomic类如何保证原子性](https://blog.csdn.net/weixin_44902907/article/details/104745116)
 
      > 使用cas操作。 java的unsafe类。cas使用版本号来解决A-B-A问题，1A-2B-3A，
+     
+5.   谈谈你对 Java 平台的理解？“Java 是解释执行”，这句话正确吗？
+
+     > java特点：一次编译，处处运行的跨平台能力；提供垃圾收集功能；
+     >
+     > java包括：jre 包括jvm以及java类库，jdk除此之外还包括编译器以及一些诊断工具；
+     >
+     > java代码由源代码通过javac编译成字节码文件，然后有jvm通过内嵌的解释器（JIT）让热点的字节码编译成机器码，这种是java的编译执行。其实java的 JDK 8 实际是解释和编译混合的一种模式。
+
+6.   Exception和error的区别
+
+     > Exception 和 Error 都是继承了 Throwable 类，他们提现了java平台对不同异常的处理。
+     >
+     > - Exception是程序正常运行中可以预料到的错误，需要捕获进行处理的；Exception异常分为可检查和不检查异常，`检查型异常`必须在编译期检查，然后显示的捕获处理。`非检查型的异常`是运行时异常，比如NullPointerException、ArrayIndexOutOfBoundsException异常，可以通过编码避免的逻辑错误，需要根据需要进行捕获，编译器不需要处理
+     >
+     > - ERROR是在正常情况下不会出现的错误，绝大多数的ERROR会导致程序处于非正常的、不可恢复的状态（一般是虚拟机异常）。比如OutOfMemoryError
+     >
+     >   ![img](https://static001.geekbang.org/resource/image/ac/00/accba531a365e6ae39614ebfa3273900.png)
+
+7.   NoClassDefFoundError 和 ClassNotFoundException 有什么区别
+
+     > - NoClassDefFoundError是当Java虚拟机或者ClassLoader实例试图加载类时，类却找不到了，但是`在编译期是没有问题的，只是在运行期找不到`；比如通过new关键字实例化或者通过方法去加载一个类；
+     > - ClassNotFoundException是一种异常，它是ava的Class.forName()动态的加载类到虚拟机中，假如根据类路径没有找到，则会抛出该异常；
+     >
+     > **前者强调编译时没问题，运行时却无法实例化一个类；后者强调运行时无法匹配到指定参数名称的类**。
+
+8.   谈谈 final、finally、 finalize 有什么不同？
+
+     > - final 可以用来修饰类、方法、变量，分别有不同的意义，final 修饰的 class 代表不可以继承扩展，final 的变量是不可以修改的，而 final 的方法也是不可以重写的（override）; 可以用于保护只读数据，有利于减少额外的同步开销；
+     >
+     > - finally 则是 Java 保证重点代码一定要被执行的一种机制。我们可以使用 try-finally 或者 try-catch-finally 来进行类似关闭 JDBC 连接、保证 unlock 锁等动作。
+     >
+     >   ```java
+     >   try {
+     >     // do something
+     >     System.exit(1);
+     >   } finally{
+     >     System.out.println(“Print from finally”);
+     >   }
+     >   // finally代码块中的代码不会被执行
+     >   ```
+     >
+     >   
+     >
+     > - finalize 是基础类 java.lang.Object 的一个方法，它的设计目的是保证对象在被垃圾收集前完成特定资源的回收。finalize 机制现在已经不推荐使用，并且在 JDK 9 开始被标记为 deprecated。
+     
+9.   String、StringBuffer、StringBuilder 有什么区别？
+
+     > - String 类是final类，是不可修改的，原生的保证了基础线程安全，他的拼接和裁剪等方法都会创建新的字符串对象；
+     >
+     > - StringBuffer 是为解决上面提到拼接产生太多中间对象的问题而提供的一个类，我们可以用 append 或者 add 方法（使用synchronized实现了同步），把字符串添加到已有序列的末尾或者指定位置。StringBuffer 本质是一个线程安全的可修改字符序列，它保证了线程安全，也带来了额外的性能开销。
+     >
+     > - 在能力上和 StringBuffer 没有本质区别，但是它去掉了线程安全的部分，有效减小了开销，是绝大部分情况下进行字符串拼接的首选；
+     >
+     >   `String的intern()` 方法就是扩充常量池的一个方法；当一个String实例str调用intern()方法时，Java查找常量池中是否有相同Unicode的字符串常量，如果有，则返回其的引用，如果没有，则在常量池中增加一个Unicode等于str的字符串并返回它的引用；
+     >
+     >   [string的intern方法](https://juejin.im/post/5d53cf70f265da03e83b6509)
+
+10.   
 
 # NIO与IO
 
 - [NIO与IO的区别](https://www.cnblogs.com/aspirant/p/8630283.html) ***
 
+- [nio和io的实现](https://github.com/Snailclimb/JavaGuide/blob/master/docs/java/BIO-NIO-AIO.md)
+
   >`区别`
   >
   >1. io面向的是流，nio面向的是缓冲buffer或者说块；所以nio比io快很多；
-  >  - java io是面向流，每次从中读取一个或者多个字节，直到读取所有的字节，它没有任何缓冲的地方；
-  >  - nio则是面向缓冲区的，它将数据读取到缓存区，可以在缓冲区中前后移动获取到的数据，更灵活；
-  >  - nio少了一次从内核空间到用户空间的拷贝，ByteBuffer.allocateDirect分配的内存使用的是本机内存而不是Java堆上的内存，和网络或者磁盘交互都在操作系统的内核空间中发生。
+  > - java io是面向流，每次从中读取一个或者多个字节，直到读取所有的字节，它没有任何缓冲的地方；
+  > - nio则是面向缓冲区的，它将数据读取到缓存区，可以在缓冲区中前后移动获取到的数据，更灵活；
+  > - nio少了一次从内核空间到用户空间的拷贝，ByteBuffer.allocateDirect分配的内存使用的是本机内存而不是Java堆上的内存，和网络或者磁盘交互都在操作系统的内核空间中发生。
   >2. io是阻塞的，nio是非阻塞的；
   >
-  >   - io的各种流是阻塞的。这意味着，一个请求来来后创建一个线程，当线程调用read/write方法时，该线程是被阻塞的，只能处理一个socket请求。直到一些数据被读取完，在此期间该线程不能干任何其他事；
-  >   - nio是非阻塞的，一个线程负责接口请求，其它多个线程请求写入一些数据到某个通道，不用等他完全写入，这个线程可以同时干别的事情，所以一个单独的线程现在可以管理多个输入和输出通道（channel）。
-  >   - NIO通讯是将整个任务切换成许多小任务，由一个线程负责处理所有io事件，并负责分发。它是利用事件驱动机制，而不是监听机制，事件到的时候再触发。NIO线程之间通过wait，notify等方式通讯。保证了每次上下文切换都有意义，减少无谓的进程切换。 
+  >  - io的各种流是阻塞的。这意味着，一个请求来来后创建一个线程，当线程调用read/write方法时，该线程是被阻塞的，只能处理一个socket请求。直到一些数据被读取完，在此期间该线程不能干任何其他事；
+  >  - nio是非阻塞的，一个线程负责接口请求，其它多个线程请求写入一些数据到某个通道，不用等他完全写入，这个线程可以同时干别的事情，所以一个单独的线程现在可以管理多个输入和输出通道（channel）。
+  >  - NIO通讯是将整个任务切换成许多小任务，由一个线程负责处理所有io事件，并负责分发。它是利用事件驱动机制，而不是监听机制，事件到的时候再触发。NIO线程之间通过wait，notify等方式通讯。保证了每次上下文切换都有意义，减少无谓的进程切换。 
   >
   >3. io没有选择器，nio是有selector选择器，Selector(多路复用器)用于监听多个通道的事件（比如：连接打开，数据到达）。因此，单个线程可以监听多个数据通道
   >
-  >   
+  >  
   >
   >bio是来一个请求开一个线程，nio是一个线程监听所有的套接字，监测到请求数据后，调用一个线程去处理，对于那些处理事件的线程来说，它多数时间都是在有效的工作，而bio，处理事件的线程亦是监听socket的线程，只要socket fd没准备好，这个线程就只能阻塞。同样1000个链接，使用nio，只需要10个线程就能搞定，使用bio得需要1000个线程。
+  >
+  >aio是真正的异步通知。nio是有一个线程监听多个socketChannal对应的缓冲区是否有数据准备好，ai是数据准备好直接回调对应的线程进行处理，是通知机制；
 
 # java泛型
 
@@ -208,12 +271,24 @@
     >
     > 3. synchronized使用Object对象本身的wait 、notify、notifyAll调度机制，ReentrantLock里面的Condition应用，能够控制notify哪个线程
 
-13. [synchronized底层实现](https://mp.weixin.qq.com/s?__biz=Mzg2OTA0Njk0OA==&mid=2247484838&amp;idx=1&amp;sn=54b33b4c76e136efac09941b2dd346b3&source=41#wechat_redirect)
+13. [公平和非公平锁](https://zhuanlan.zhihu.com/p/45305463)
+
+    > **非公平锁和公平锁的两处不同：**
+    >
+    > 1. 非公平锁在调用 lock 后，首先就会调用 CAS 进行一次抢锁，如果这个时候恰巧锁没有被占用，那么直接就获取到锁返回了。
+    >
+    > 2. 非公平锁在 CAS 失败后，和公平锁一样都会进入到 tryAcquire 方法，在 tryAcquire 方法中，如果发现锁这个时候被释放了（state == 0），非公平锁会直接 CAS 抢锁，但是公平锁会判断等待队列是否有线程处于等待状态，如果有则不去抢锁，乖乖排到后面。
+    >
+    > 公平锁和非公平锁就这两点区别，如果这两次 CAS 都不成功，那么后面非公平锁和公平锁是一样的，都要进入到阻塞队列等待唤醒。
+    >
+    > 相对来说，非公平锁会有更好的性能，因为它的吞吐量比较大。当然，非公平锁让获取锁的时间变得更加不确定，可能会导致在阻塞队列中的线程长期处于饥饿状态。
+
+14. [synchronized底层实现](https://mp.weixin.qq.com/s?__biz=Mzg2OTA0Njk0OA==&mid=2247484838&amp;idx=1&amp;sn=54b33b4c76e136efac09941b2dd346b3&source=41#wechat_redirect)
 
     > - 对于synchronized同步代码块，会在代码开始和结束的位置有monitorEnter和minitorExit指令，当执行monitorEnter时，线程就必须获取monitor对象的持有权限（monitor对象存在于每个Java对象的对象头中，synchronized 锁便是通过这种方式获取锁的）。
     > - 对于synchronized同步方法，会有ACC_SYNCHRONIZED 标识，表示改方法是同步方法，调用方法前需要获取对象实例的锁
 
-14. Jdk1.6后有的锁优化 ***
+15. Jdk1.6后有的锁优化 ***
 
     > `锁优化`：引入了偏向锁、轻量级锁、自旋锁10次、自适应自旋锁、锁粗化、锁消除来减少锁操作的开销；
     >
@@ -223,27 +298,27 @@
     >
     > `锁优化的流程`：① 对象的偏向锁会偏向于第一个获取它的线程，接下来如果没有其他线程获取该对象的锁，则持有偏向锁的线程会不执行同步操作；②当有第二个线程获取该锁的时候，偏向锁升级为轻量级锁，轻量级锁使用了cas操作（`主要解决的是绝大部分情况下是不存在竞争的，不需要同步操作`），③轻量级锁不加锁的进行尝试，当失败后不会挂起线程（`因为挂起线程/恢复线程的操作都需要转入内核态中完成（用户态转换到内核态会耗费时间）`）而是在线程周围进行忙循环；当并发冲突比较大的时候会升级为重量级锁；
 
-15. [java锁的详细介绍](https://www.cnblogs.com/jyroy/p/11365935.html)  ???
+16. [java锁的详细介绍](https://www.cnblogs.com/jyroy/p/11365935.html)  ???
 
     > 
 
-16. [CountDownLatch实现原理](https://blog.csdn.net/u014653197/article/details/78217571)
+17. [CountDownLatch实现原理](https://blog.csdn.net/u014653197/article/details/78217571)
 
     > `简介` ：CountDownLatch是一个同步工具类，用来协调多个线程之间的同步。这个工具通常用来控制线程等待，它可以让某一个线程等待直到倒计时结束，再开始执行 
     >
     > `原理` ：让需要的暂时阻塞的线程（await），进入一个死循环里面，得到某个条件后再退出循环(count=0)，以此实现阻塞当前线程的效果。
 
-17. [深入理解Semaphore](https://blog.csdn.net/qq_19431333/article/details/70212663) 
+18. [深入理解Semaphore](https://blog.csdn.net/qq_19431333/article/details/70212663) 
 
     > Semaphore(共享信号量)-允许多个线程同时访问： synchronized 和 ReentrantLock 都是一次只允许一个线程访问某个资源，Semaphore(信号量)可以指定多个线程同时访问某个资源。
 
-18. CyclicBarrier(循环栅栏)  ***
+19. CyclicBarrier(循环栅栏)  ***
 
     >  CyclicBarrier 和 CountDownLatch非常类似，它也可以实现线程间的技术等待，但是它的功能比 CountDownLatch 更加复杂和强大。主要应用场景和 CountDownLatch 类似。CyclicBarrier的字面意思是可循环使用（Cyclic）的屏障（Barrier）。CyclicBarrier默认的构造方法是 CyclicBarrier(int parties)，其参数表示屏障拦截的线程数量，每个线程调用await方法告诉 CyclicBarrier 我已经到达了屏障，然后当前线程被阻塞
     >
     >  它要做的事情是，让一组线程到达一个屏障（也可以叫同步点）时被阻塞，直到最后一个线程到达屏障时，屏障才会开门，所有被屏障拦截的线程才会继续干活。
 
-19. [Java并发包基石-AQS详解](https://www.cnblogs.com/chengxiao/archive/2017/07/24/7141160.html)   /[AQS 原理以及 AQS 同步组件总结](https://mp.weixin.qq.com/s?__biz=Mzg2OTA0Njk0OA==&mid=2247484832&amp;idx=1&amp;sn=f902febd050eac59d67fc0804d7e1ad5&source=41#wechat_redirect)  ***
+20. [Java并发包基石-AQS详解](https://www.cnblogs.com/chengxiao/archive/2017/07/24/7141160.html)   /[AQS 原理以及 AQS 同步组件总结](https://mp.weixin.qq.com/s?__biz=Mzg2OTA0Njk0OA==&mid=2247484832&amp;idx=1&amp;sn=f902febd050eac59d67fc0804d7e1ad5&source=41#wechat_redirect)  ***
 
     > 1. ` 核心思想`：当被请求的共享资源处于空闲状态，则当前请求资源的线程被标记为有效状态，共享资源被设置为锁定状态。如果被请求的资源被占用，则需要一套线程阻塞等待以及被唤醒时的锁分配的机制，AQS就是使用CLH队列锁来实现的，即将暂时获取不到锁的线程加入到队列中。
     >
@@ -259,23 +334,23 @@
     >    tryReleaseShared(int)//共享方式。尝试释放资源，成功则返回true，失败则返回false
     >    ```
 
-20. synchronized和volatile的区别
+21. synchronized和volatile的区别
 
     > 1. 粒度不同，前者锁对象和类，后者针对变量；
     > 2. syn保证三大特性，volatile不保证原子性；
     > 3. syn阻塞，volatile线程不阻塞；
     > 4. syn编译器优化，volatile不优化；
 
-21. 悲观锁和乐观锁
+22. 悲观锁和乐观锁
 
     > - 乐观锁是假设并发冲突不会发生，总是不加锁的执行操作，如果失败，则会进行重试；
     > - 悲观锁是假设冲突会发生，执行操作的时候就加一个独占锁；
 
-22. cas是什么
+23. cas是什么
 
     > cas就是comare and swap，就是内存值V，旧值A，要修改的值b，只有当预期值A与内存的值V相等时才执行设置值为b，并且返回成功，否则返回失败；一般是配合volatile关键字使用，才可以保证拿到的变量主内存中的值，修改后可以将值设置到主内存中去；
 
-23. java内存模型  ***
+24. java内存模型  ***
 
     > 1. java内存模型分为主内存和工作内存，共享变量保存在主内存中，每一个线程需要修改和读取共享变量的时候都要从主内存中copy一份到自己的工作内存中，修改完后会写到主内存中去；
     >
@@ -298,7 +373,7 @@
     >
     > 5. 指令重排序，只要和源代码产生的结果一样，编译器会进行操作的重排序，提升计算机性能；
 
-24. Happens-before 关系
+25. Happens-before 关系
 
     > 如果线程 A 与线程 B 满足 happens-before 关系，则线程 A 执行动作的结果对于线程 B 是可见的
     >
@@ -307,7 +382,7 @@
     > - Volatile 变量法则：对一个Volatile变量的写操作先行发生于后面对这个变量的读操作
     > - 传递性：如果 A happens-before 于 B，且 B happens-before C，则 A happens-before C。
 
-25. Thread.sleep(0)的作用是什么
+26. Thread.sleep(0)的作用是什么
 
     > 由于java使用抢占式调度算法，而sleep操作可以放弃cpu的执行时间，这样可以操作系统重新进行一次操作系统重新分配时间片的操作；  
 
@@ -483,16 +558,35 @@
     > `jdk1.7与1.8的实现机制`
     >
     > - Jdk1.7采用的分段锁技术，整个hash表被分成多个段，每个段对应一个segment锁。段与段之间的可以并发访问，同一个段之间并发访问需要获取锁；
-    > - Jdk1.8取消了segment分段锁机制，采用cas+synchronized控制并发，使用数组加链表+红黑树取代了数组+链表。
+    > - Jdk1.8取消了segment分段锁机制，jdk1.8主要使用了UNsafe类的cas自旋赋值+sychronize同步+lockSupport阻塞等手段实现高效并发。使用数组加链表+红黑树取代了数组+链表。
     >
-    > `concurrentHashMap 1.8`:
+    > ConcurrentHashMap的JDK8与JDK7版本的并发实现相比，最大的区别在于JDK8的锁粒度更细，理想情况下talbe数组元素的大小就是其支持并发的最大个数，在JDK7里面最大并发个数就是Segment的个数，默认值是16。
+    >
+    > jdk1.8将锁的级别控制在了更细粒度的table元素级别，也就是说只需要锁住这个链表的head节点，并不会影响其他的table元素的读写。缺点是需要等扩容完之后，所有的读写操作才能进行，所以扩容的效率就成为了整个并发的一个瓶颈点，
+    >
+    > 
+    >
+    > `concurrentHashMap 1.8`:使用了多线程扩容
     >
     > `sizeCtl 属性`：代表是初始化哈希表，还是扩容 rehash 的过程
     >
-    > - 0：默认值
-    > - -1：代表哈希表正在进行初始化
-    > - 大于0：相当于 HashMap 中的 threshold，表示阈值
-    > - 小于-1：代表有多个线程正在进行扩容
+    > - 未初始化：
+    >
+    > - - sizeCtl=0：表示没有指定初始容量。
+    >   - sizeCtl>0：表示初始容量。
+    >
+    > - 初始化中：
+    >
+    > - - sizeCtl=-1,标记作用，告知其他线程，正在初始化
+    >
+    > - 正常状态：
+    >
+    > - - sizeCtl=0.75n ,扩容阈值
+    >
+    > - 扩容中:
+    >
+    > - - sizeCtl < 0 : 表示有其他线程正在执行扩容
+    >   - sizeCtl = (resizeStamp(n) << RESIZE_STAMP_SHIFT) + 2 :表示此时只有一个线程在执行扩容
     >
     > `putval方法`
     >
@@ -511,9 +605,14 @@
     >    
     >
     > - 放置元素的时候，如果对应的位置为空，则以cas的方式在对应的位置添加节点；
+    >
     > - hash表只允许一个线程进行初始化，判断sizeCtl属性，来判断U.compareAndSwapInt初始化；
+    >
     > - 扩容的时候需要会使用多线程扩容；helpTransfer（）方法是调用多个工作线程一起帮助进行扩容
+    >
     > - volatile`类型的变量`baseCount记录元素的个数，通过cas的方式修改baseCount
+    >
+    >   
     >
     > 
     >
@@ -535,7 +634,84 @@
     >
     > `concurrentHashMap不允许空key和空value；hashMap允许一个空key，多个空value`
 
-14. [一致性hash算法](https://www.jianshu.com/p/e968c081f563)
+14. concurrentHashMap进行扩容（1.8）
+
+    > 它使用多线程扩容。使用sizeCtl,
+    >
+    > sizeCtl ：默认为0，用来控制table的初始化和扩容操作，具体应用在后续会体现出来。 不同状态，sizeCtl所代表的含义也有所不同。
+    >
+    > - 未初始化：
+    >
+    > - - sizeCtl=0：表示没有指定初始容量。
+    >   - sizeCtl>0：表示初始容量。
+    >
+    > - 初始化中：
+    >
+    > - - sizeCtl=-1,标记作用，告知其他线程，正在初始化
+    >
+    > - 正常状态：
+    >
+    > - - sizeCtl=0.75n ,扩容阈值
+    >
+    > - 扩容中:
+    >
+    > - - sizeCtl < 0 : 表示有其他线程正在执行扩容
+    >   - sizeCtl = (resizeStamp(n) << RESIZE_STAMP_SHIFT) + 2 :表示此时只有一个线程在执行扩容
+    >
+    > 扩容：
+    >
+    > 扩容时候会判断sizeCtl这个值，如果超过阈值就要扩容。
+    >
+    > `transferIndex是扩容索引`，表示已经分配给扩容线程的table数组索引位置。主要用来协调多个线程，并发安全地获取迁移任务（hash桶）。
+    >
+    > ​	在扩容之前，transferIndex 在数组的最右边 。此时有一个线程发现已经到达扩容阈值，准备开始扩容。扩容线程，在迁移数据之前，首先要将transferIndex左移（以cas的方式修改**transferIndex=transferIndex-stride(要迁移hash桶的个数)**），获取迁移任务。每个扩容线程都会通过for循环+CAS的方式设置transferIndex，因此可以确保多线程扩容的并发安全。
+    >
+    > 
+    >
+    > 换个角度，我们可以将待迁移的table数组，看成一个任务队列，transferIndex看成任务队列的头指针。而扩容线程，就是这个队列的消费者。扩容线程通过CAS设置transferIndex索引的过程，就是消费者从任务队列中获取任务的过程。为了性能考虑，我们当然不会每次只获取一个任务（hash桶），因此ConcurrentHashMap规定，每次至少要获取16个迁移任务（迁移16个hash桶，MIN_TRANSFER_STRIDE = 16）
+    >
+    > cas设置transferIndex的源码如下：
+    >
+    > ```java
+    > 
+    >   private final void transfer(Node<K,V>[] tab, Node<K,V>[] nextTab) {
+    >         //计算每次迁移的node个数
+    >         if ((stride = (NCPU > 1) ? (n >>> 3) / NCPU : n) < MIN_TRANSFER_STRIDE)
+    >             stride = MIN_TRANSFER_STRIDE; // 确保每次迁移的node个数不少于16个
+    >         ...
+    >         for (int i = 0, bound = 0;;) {
+    >             ...
+    >             //cas无锁算法设置 transferIndex = transferIndex - stride
+    >             if (U.compareAndSwapInt
+    >                          (this, TRANSFERINDEX, nextIndex,
+    >                           nextBound = (nextIndex > stride ?
+    >                                        nextIndex - stride : 0))) {
+    >                   ...
+    >                   ...
+    >             }
+    >             ...//省略迁移逻辑
+    >         }
+    >     }
+    > 
+    > ```
+    >
+    > `ForwardingNode节点 `
+    >
+    > 1. 标记作用，表示其他线程正在扩容，并且此节点已经扩容完毕
+    > 2. 关联了nextTable,扩容期间可以通过find方法，访问已经迁移到了nextTable中的数据
+    >
+    > 扩容线程A 以cas的方式修改transferindex=31-16=16 ,然后按照降序迁移table[31]--table[16]这个区间的hash桶。迁移hash桶时，会将桶内的链表或者红黑树，按照一定算法，拆分成2份，将其插入nextTable[i]和nextTable[i+n]（n是table数组的长度）。 迁移完毕的hash桶,会被设置成ForwardingNode节点，以此告知访问此桶的其他线程，此节点已经迁移完毕。
+    >
+    > 线程2访问到了ForwardingNode节点，如果线程2执行的put或remove等写操作，那么就会先帮其扩容。如果线程2执行的是get等读方法，则会调用ForwardingNode的find方法，去nextTable里面查找相关元素。
+    >
+    > 如果准备加入扩容的线程，发现以下情况，放弃扩容，直接返回。
+    >
+    > - 发现transferIndex=0,即所有node均已分配
+    > - 发现扩容线程已经达到最大扩容线程数
+    >
+    > 
+
+15. [一致性hash算法](https://www.jianshu.com/p/e968c081f563)
 
     > `意义`：
     >
@@ -606,8 +782,8 @@
 
 3. 四种引用
 
-   > 强引用：java虚拟机不会回收；
-   > 软引用：如果内存空间不足了，就会回收这些对象的内存；
+   > 强引用：普通的java对象引用，只要有引用存在，java虚拟机就不会回收；
+   > 软引用：可以让对象豁免一些垃圾收集，如果内存空间不足了，就会回收这些对象的内存；
    > 弱引用：与软引用相比弱引用的对象拥有更短暂的生命周期，一旦发现了只具有弱引用的对象，不管当前内存空间足够与否，都会回收它的内存；
    > 虚引用：主要用来跟踪对象被垃圾回收器回收的活动，被回收时会收到一个系统通知；
 
@@ -654,13 +830,10 @@
    10. Full GC的触发条件,不同垃圾回收期的触发条件不同 ***
 
    > - serial GC收集器下：
-   >   1. 当触发一次yongGC前，如果发现yongGC的平均晋升大小比老年代的剩余空间大，则会转yongGC为fullGC；
-   >   2. 如果永久代没有足够的分配空间，则需要出发一次fullGC；
-   >   3. 使用system.gc()方法，默认是出发full gc； 
-
-   > - Parallel Scavenge 收集器下默认出发fullGC前需要先进行一次yongGC，并且两次GC之间能让应用程序稍微运行一小下，以期降低 full GC的暂停时间；
-
-   > - CMS收集器下，先检查old gen的大小，达到触发比例才会启动old gc；
+   >   1. 当年轻代晋升到老年代的对象大小比目前老年代剩余的空间大小还要大时，此时会触发Full GC；
+   >   2. 当老年代的空间使用率超过某阈值时，此时会触发Full GC;
+   >   3. 当元空间不足时（JDK1.7永久代不足），也会触发Full GC;
+   >   4. 使用system.gc()方法，默认是出发full gc； 
 
    11. Survivor区对象晋升为老年代对象的条件
 
@@ -670,10 +843,10 @@
 
    > Serial 收集器是针对新生代的收集器，单线程收集器，采用的是复制算法；
    > Parallel New（并行）收集器，Serial的多线程版本 新生代采用复制算法，cms的搭配使用；
-   > Parallel Scavenge（并行）收集器，针对新生代，采用复制收集算法，关注的是吞吐量；
+   > Parallel Scavenge（并行）收集器，针对新生代，采用复制收集算法，关注的是`吞吐量`；
    > Serial Old（串行）收集器，老年代采用标记清理
    > Parallel Old（并行）收集器，针对老年代，标记整理
-   > CMS收集器，基于标记清理，老年代收集器，注重的是最短停顿时间；
+   > CMS收集器，基于标记清理，老年代收集器，注重的是`最短停顿时间`；
    > G1收集器(JDK)：整体上是基于标记-整理，分代收集
    > 综上：新生代基本采用复制算法，老年代采用标记整理算法。cms采用标记清除
 
@@ -694,12 +867,23 @@
 
    > G1收集器
    >
-   > - 特点：包括新生代和老年代的垃圾回收；并行并发，分代收集，标记-整理，可预测的停顿；
-   > - 流程：
+   > - `特点`：包括新生代和老年代的垃圾回收；并行并发，分代收集，标记-整理，可预测的停顿；
+   >
+   >   1、并行与并发：G1能够更充分利用多CPU、多核环境运行
+   >
+   >   2、分代收集：G1虽然也用了分代概念，但相比其他收集器需要配合不同收集协同工作，但G1收集器能够独立管理整个堆
+   >
+   >   3、空间管理：与CMS的标记一清理算法不同，G1从整体上基于标记一整理算法，将整个Java堆划分为多个大小相等的独立区域（Region）,这种算法能够在运行过程中不产生内存碎片
+   >
+   >   4、可预测的停顿：降低停顿时间是G1和CMS共同目标，但是G1追求低停顿外，还能建立可预测的停顿时间模型，能让使用者明确指定一个长度为M毫秒的时间片段内，消耗在垃圾收集器上的时间不得超过N毫秒。
+   >
+   > - `流程`：
    >   初始标记：标记GC Roots能够直接关联到的对象，这阶段需要停顿线程，时间很短
    >   并发标记：进行可达性分析，这阶段耗时较长，可与用户程序并发执行
    >   最终标记：修正发生变化的记录，需要停顿线程，但是可并行执行
-   >   筛选回收：对各个Region的回收价值和成本进行排序，根据用户所期望的停顿时间来执行回收计划
+   >   筛选回收：对各个Region的回收价值和成本进行排序，根据用户所期望的停顿时间来执行回收计划；
+   >
+   > 
 
    14. 虚拟机性能监控工具 ***
 
@@ -744,22 +928,41 @@
    > 类加载被分为加载、连接、初始化过程；连接又细分为验证、准备和解析；
    >
    > 1. 装载：jvm将字节码文件以二进制的方式读入到内存中，转化为运行时数据结构；
-   > 2. 连接：主要做加载完的准备工作，验证字节码是否符合规范；为静态变量分配内存，分配初始值；解析类、字段、接口，将符号引用转换为直接引用；
+   > 2. 连接：主要做加载完的准备工作，`验证字节码是否符合java以及jvm规范`；`为静态变量分配内存，分配初始值`；`解析类、字段、接口，将符号引用转换为直接引用`；
    > 3. 初始化：new实例或者读取设置类的静态变量；反射方式执行以上行为；初始化子类的时候触发父类初始化；作为程序入口的主类；
-   
+
 
    17. 两种主动加载方式
 
    >class.forName()静态方法；
-   >classLoader.loadClass()方法；
+   >classLoader.loadClass()方法;
 
    18. 双亲委派模型
 
-       > - 被不同类加载器加载的同名类，也认为是不同的类。
-       >
-       > - 双亲委派模型。分为两种类加载器： 1 是启动类加载器 ，是虚拟机自身的一部分；2 是所有的其他类加载器，这些类加载器都由java语言实现。独立于虚拟机外部，全部继承自java.lang.ClassLoader抽象类。类加载器具体层次关系：启动类加载器->扩展类加载器->系统类加载器->自定义类加载器。每一个类的加载，会优先由父加载器来加载。这种方式就称为双亲委派，双亲委派保证了java基本类的不会被破坏和替代
+   > - 被不同类加载器加载的同名类，也认为是不同的类。
+   > - 双亲委派模型。分为两种类加载器： 1 是启动类加载器 ，是虚拟机自身的一部分；2 是所有的其他类加载器，这些类加载器都由java语言实现。独立于虚拟机外部，全部继承自java.lang.ClassLoader抽象类。类加载器具体层次关系：启动类加载器->扩展类加载器->系统类加载器->自定义类加载器。每一个类的加载，会优先由父加载器来加载。这种方式就称为双亲委派，双亲委派保证了java基本类的不会被破坏和替代
 
-       
+   19. java虚拟机调优记录
+
+   ```markdown
+   1. jstat -gcutil -h 10 150355 10000 10000
+   	 jstat日志详见 jstat日志
+   
+   日志详见catalina.out日志
+   
+   2. 使用jstack查找进程下的线程信息
+   第一步：top                   #### 找进程
+   第二步：top -Hp pid           #### 看具体线程使用系统资源情况
+   第三步：printf "%x\n"         #####线程id 10进制的线程id转十六进制的线程id
+   第四步:jstack pid | grep     -> jstat.txt #####线程id,如果要看详细的就把 jstack pid  到具体文件
+   
+   ```
+
+   
+
+   
+
+   
 
 # 设计模式 ?
 
@@ -1091,7 +1294,7 @@
 
    > [mysql慢查询 + explain使用](https://blog.csdn.net/wuhuagu_wuhuaguo/article/details/80625124)
    >
-   > - type：const、eq_ref、ref、range、indexhe和ALL
+   > - type：const、eq_ref、ref、range、index和ALL
    > - possible_keys：肯恩用到的索引
    > - key：实际用到的索引
    > - rows：返回结果所需检查的行数
@@ -1266,7 +1469,7 @@
 
    [TCP和UDP的区别2](https://blog.csdn.net/Li_Ning_/article/details/52117463)
 
-   [深入理解两者的区别](https://blog.csdn.net/striveb/article/details/84063712)
+   [深入理解两者的区别](https://blog.csdn.net/striveb/article/details/84063712) ***
 
    > - UDP协议和TCP协议都是传输层协议。
    >
@@ -1812,7 +2015,7 @@
    > `顺序读写、零拷贝机制、分区、批量发送、数据压缩`
    >
    > - 计算机组成（划重点）里我们学过，硬盘是机械结构，需要指针寻址找到存储数据的位置，所以，如果是随机IO，磁盘会进行频繁的寻址，导致写入速度下降。Kafka使用了顺序IO提高了磁盘的写入速度，Kafka会将数据顺序插入到文件末尾，避免了随机读写磁盘导致的性能瓶颈。有测试证明多个分区顺序写磁盘的总效率要比随机写内存还要高。顺序结构的存储对于即使数以TB的消息存储也能够保持长时间的稳定性能。
-   > - “零拷贝(zero-copy)”系统调用机制，就是跳过“用户缓冲区”的拷贝，建立一个磁盘空间到内存的直接映射，数据不再复制到“用户态缓冲区”，省去了一步比较耗时的工作；.Memory Mapped Files：这个和Java NIO中的内存映射基本相同。  
+   > - “零拷贝(zero-copy)”系统调用机制，就是跳过“用户缓冲区”的拷贝，建立一个磁盘空间到内存的直接映射，数据不再复制到“用户态缓冲区”，省去了一步比较耗时的工作；Memory Mapped Files
    > - kafka中的topic中的内容可以被分为多分partition存在,每个partition,所以每次操作都是针对一小部分做操作，很轻便，并且增加并行操作的能力；生产上并发写，消费上多个消费者进消费，提高并发能力；
    > - kafka允许进行批量发送消息，producter发送消息的时候，可以将消息缓存在本地，等到了固定条件发送到kafka；
    > - Kafka还支持对消息集合进行压缩，Producer可以通过GZIP或Snappy格式对消息集合进行压缩压缩的好处就是减少传输的数据量，减轻对网络传输的压力；
@@ -1820,7 +2023,7 @@
 3. 应用场景
 
    >- 应用耦合：多应用（服务）间通过消息队列对同一消息进行处理，避免调用接口失败导致整个过程失败；
-   >- 限流削峰：广泛应用于秒杀或抢购活动中，避免流量过大导致应用系统挂掉的情况；
+   >- 限流削峰：应对处理任务某一时刻比较大的场景，避免流量过大导致应用系统挂掉的情况；
    >- 异步处理：多应用对消息队列中同一消息进行处理，应用间并发处理消息，相比串行处理，减少处理时间；
    >- 顺序保证：一般的业务场景中，对消息的顺序的要求还是比较高的，消息队列可以做到；
    >
