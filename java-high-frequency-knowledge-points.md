@@ -85,7 +85,151 @@
      >
      >   [string的intern方法](https://juejin.im/post/5d53cf70f265da03e83b6509)
 
-10.   
+10. 谈谈 Java 反射机制，动态代理是基于什么原理？
+
+    > -  动态和静态类型的区分：简单区分就是语言类型信息是在运行时检查，还是编译期检查。
+    > -  反射机制是赋予程序运行时自省的能力，通过反射可以直接操作类或者对象的定义，获取类声明的属性或者方法，调用方法或者构造对象，甚至可以修改类的定义；Class、Field、Method、Constructor 等，这些完全就是我们去操作类和对象的元数据对应。
+    > -  动态代理是方便运行时动态构建代理、动态处理代理方法调用的机制。比如jdk的动态代理就是利用反射机制，当然还有字节码操作机制
+
+11.   int 和 Integer 有什么区别？谈谈 Integer 的值缓存范围。
+
+      > - int是我们常说的整数类型，是java的8个基本数据类型之一。Integer是int的对应的包装类，在java5中引入了自动装箱和拆箱功能。自动装箱是编译器调用valueOf将原始类型值转换成对象，同时自动拆箱时，编译器通过调用类似intValue()将对象类型转换成基本数据类型，发生在编译阶段。
+      >
+      > - Integer的值的缓存，创建对象一般是直接new一个对象，但是他的大部分数据都是在较小的范围内，为了改善西能，会将-128到127之间的数据缓存起来；
+      >
+      > - 由于integer没有执行加减乘除的操作，所以进行计算是会进行拆箱。（常见的错误：自动拆箱会也会导致空指针异常）
+      >
+      >   ```java
+      >   java 语句 Integer i = 1; i += 1; 做了哪些事情？
+      >   首先 Integer i = 1; 做了自动装箱（使用 valueOf() 方法将 int 装箱为 Integer 类型），接着 i += 1; 先将 Integer 类型的 i 自动拆箱成 int（使用 intValue() 方法将 Integer 拆箱为 int），完成加法运行之后的 i 再装箱成 Integer 类型。
+      >   ```
+
+12.   对比 Vector、ArrayList、LinkedList 有何区别？
+
+      > - Vector 是 Java 早期提供的**线程安全的动态数组**，如果不需要线程安全，并不建议选择，毕竟同步是有额外开销的。Vector 内部是使用对象数组来保存数据，可以根据需要自动的增加容量，当数组已满时，会创建新的数组，并拷贝原有数组数据。
+      >
+      > - ArrayList 是应用更加广泛的**动态数组**实现，它本身不是线程安全的，所以性能要好很多。与 Vector 近似，ArrayList 也是可以根据需要调整容量，不过两者的调整逻辑有所区别，初始容量都是10，Vector 在扩容时会提高 1 倍，而 ArrayList 则是增加 50%。
+      >
+      > - LinkedList 顾名思义是 Java 提供的**双向链表**，所以它不需要像上面两种那样调整容量，它也不是线程安全的。
+      >
+      >   [arrayList和linkedList源码](https://blog.csdn.net/u012926924/article/details/47955035)
+
+13.   对比 Hashtable、HashMap、TreeMap 有什么不同？
+
+      > - Hashtable 是早期 Java 类库提供的一个hash表实现，扩展了 Dictionary。它本身是`同步的，不支持 null 键和值，由于同步导致的性能开销`，所以已经很少被推荐使用。
+      > - HashMap 是应用更加广泛的哈希表实现，行为上大致上与 HashTable 一致，主要区别在于 `HashMap 不是同步的，支持 null 键和值等`。通常情况下，HashMap 进行 put 或者 get 操作，可以达到常数时间的性能，所以**它是绝大部分利用键值对存取场景的首选**。
+      > - TreeMap 则是基于红黑树的一种`提供顺序访问的 Map`，和 HashMap 不同，它的 get、put、remove 之类操作都是 O（log(n)）的时间复杂度，具体顺序可以由指定的 Comparator 来决定，或者根据键的自然顺序来判断。
+
+14.   如何保证容器是线程安全的？ConcurrentHashMap 如何实现高效地线程安全？
+
+      > - Java 提供了不同层面的线程安全支持。在传统集合框架内部，除了 Hashtable 等同步容器，还提供了所谓的`同步包装器`，我们可以调用 Collections 工具类提供的包装方法，来获取一个同步的包装容器（如Collections.synchronizedMap/synchronizedList/synchronizeSet），但是它们都是利用非常粗粒度的同步方式，在高并发情况下，性能比较低下。
+      >
+      > 另外，更加普遍的选择是利用并发包提供的线程安全容器类，它提供了：
+      >
+      > - 各种并发容器，比如 ConcurrentHashMap、CopyOnWriteArrayList。
+      > - 各种线程安全队列（Queue/Deque），如 ArrayBlockingQueue、SynchronousQueue。
+      > - 各种有序容器的线程安全版本等。
+      >
+      > 具体保证线程安全的方式，包括有从简单的 synchronize 方式，到基于更加精细化的，比如基于分离锁实现的 ConcurrentHashMap 等并发实现等。具体选择要看开发的场景需求，总体来说，并发包内提供的容器通用场景，远优于早期的简单同步实现。
+
+15.   [LinkedBlockingQueue和ArrayBlockingQueue的区别](https://blog.csdn.net/Androidlushangderen/article/details/80219264)
+
+      > - ArrayBlockingQueue是有界的，而LinkedBlockingQueue默认是无界的（可以通过指定大小来变为有界）。ArrayBlockingQueue有界就意味着我们使用ArrayBlockingQueue必须指定capacity大小。这样的话，内存空间会直接预先分配好，所以在使用LinkedBlockingQueue无界情况下时要考虑到内存实际使用问题，防止内存溢出问题的发生。
+      >
+      > - 锁使用的比较。ArrayBlockingQueue内部使用1个锁来控制队列项的插入、取出操作，而LinkedBlockingQueue则是使用了2个锁来控制，一个名为putLock，另一个是takeLock，但是锁的本质都是ReentrantLock。因为LinkedBlockingQueue使用了2个锁的情况下，所以在一定程度上LinkedBlockingQueue能更好支持高并发的场景操作，这里指的是并发性上，不是吞吐量。
+      >
+      > - 吞吐性能上的比较。这里其实会涉及到里面具体的操作差异的问题。在ArrayBlockingQueue内部，因为是直接使用数组空间的，而且都是预先分配好的，所以操作没有那么复杂，而在LinkedBlockingQueue中，是通过链表进行维护的，而且每次插入的对象还要转为Node<>(e)对象，相当于多做了一步操作，但是根据LinkedBlockingQueue的官方描述，它是具有更好吞吐性能的。
+
+16.   为什么需要 ConcurrentHashMap？
+
+      > -  Hashtable 本身比较低效，因为它的实现基本就是将 put、get、size 等各种方法加上“synchronized”。简单来说，这就导致了所有并发操作都要竞争同一把锁，一个线程在进行同步操作时，其他线程只能等待，大大降低了并发操作的效率。
+      >
+      > - 前面已经提过 HashMap 不是线程安全的，并发情况会导致类似 CPU 占用 100% 等一些问题，
+      >
+      > - 那么能不能利用 Collections 提供的同步包装器来解决问题呢？我们发现同步包装器只是利用输入 Map 构造了另一个同步版本，所有操作虽然不再声明成为 synchronized 方法，但是还是利用了“this”作为互斥的 mutex，没有真正意义上的改进！
+
+17.   线程安全的CopyOnWriteArrayList的底层实现
+
+      >  ```java
+      > public class CopyOnWriteArrayList<E>
+      >     implements List<E>, RandomAccess, Cloneable, java.io.Serializable {
+      >     private static final long serialVersionUID = 8673264195747942595L;
+      > 
+      >     /** The lock protecting all mutators */
+      >     final transient ReentrantLock lock = new ReentrantLock();
+      > 
+      >     /** The array, accessed only via getArray/setArray. */
+      >     private transient volatile Object[] array;
+      >     public boolean add(E e) {
+      >         final ReentrantLock lock = this.lock;
+      >        //1、先加锁
+      >         lock.lock();
+      >         try {
+      >             Object[] elements = getArray();
+      >             int len = elements.length;
+      >            //2、拷贝数组
+      >             Object[] newElements = Arrays.copyOf(elements, len + 1);
+      >           //3、将元素加入到新数组中
+      >             newElements[len] = e;
+      >           //4、将array引用指向到新数组
+      >             setArray(newElements);
+      >             return true;
+      >         } finally {
+      >            //5、解锁
+      >             lock.unlock();
+      >         }
+      >     }
+      > 
+      >  ```
+      >
+      > 由于所有的写操作都是在新数组进行的，这个时候如果有线程并发的写，则通过锁来控制，如果有线程并发的读
+      >
+      > - 如果写操作未完成，那么直接读取原数组的数据；
+      > - 如果写操作完成，但是引用还未指向新数组，那么也是读取原数组数据；
+      > - 如果写操作完成，并且引用已经指向了新的数组，那么直接从新数组中读取数据。
+      >
+      > `缺点`：
+      >
+      > - 由于写操作的时候，需要拷贝数组，会消耗内存，如果原数组的内容比较多的情况下，可能导致young gc或者full gc
+      >
+      > - 不能用于实时读的场景，像拷贝数组、新增元素都需要时间，所以调用一个set操作后，读取到数据可能还是旧的，虽然CopyOnWriteArrayList 能做到最终一致性，但是还是没法满足实时性要求；
+      >
+      > - CopyOnWriteArrayList 合适读多写少的场景，不过这类慎用
+      >   因为谁也没法保证CopyOnWriteArrayList 到底要放置多少数据，万一数据稍微有点多，每次add/set都要重新复制数组，这个代价实在太高昂了。在高性能的互联网应用中，这种操作分分钟引起故障。
+
+18.   Java 有几种文件拷贝方式？哪一种最高效？
+
+      > - 利用 java.io 类库，直接为源文件构建一个 FileInputStream 读取，然后再为目标文件构建一个 FileOutputStream，完成写入工作。
+      > - 利用 java.nio 类库提供的 transferTo 或 transferFrom 方法实现。
+      > - 对于 Copy 的效率，这个其实与操作系统和配置等情况相关，总体上来说，NIO transferTo/From 的方式**可能更快**，因为它更能利用现代操作系统底层机制，避免不必要拷贝和上下文切换。
+
+19.   拷贝实现机制分析
+
+      > - 首先，你需要理解用户态空间（User Space）和内核态空间（Kernel Space），这是操作系统层面的基本概念，操作系统内核、硬件驱动等运行在内核态空间，具有相对高的特权；而用户态空间，则是给普通应用和服务使用;
+      > - 当我们使用输入输出流进行读写时，实际上是进行了多次上下文切换，比如应用读取数据时，先在内核态将数据从磁盘读取到内核缓存，再切换到用户态将数据从内核缓存读取到用户缓存。
+      > - 而基于 NIO transferTo 的实现方式，在 Linux 和 Unix 上，则会使用到零拷贝技术，数据传输并不需要用户态参与，省去了上下文切换的开销和不必要的内存拷贝，进而可能提高应用拷贝性能。注意，transferTo 不仅仅是可以用在文件拷贝中，与其类似的，例如读取磁盘文件，然后进行 Socket 发送，同样可以享受这种机制带来的性能和扩展性提高。
+      > - 零拷贝可以理解为内核态空间与磁盘之间的数据传输，不需要再经过用户态空间
+      > - `提高类似拷贝等IO操作的特性`:
+      >   - 在程序中，使用缓存等机制，合理减少 IO 次数（在网络通信中，如 TCP 传输，window 大小也可以看作是类似思路）。
+      >   - 使用 transferTo 等机制，减少上下文切换和额外 IO 操作。
+      >   - 尽量减少不必要的转换过程，比如编解码；对象序列化和反序列化
+
+20.   谈谈接口和抽象类有什么区别？
+
+      > - `接口是对行为的抽象，它是抽象方法的集合`，利用接口可以达到 API 定义和实现分离的目的。接口，不能实例化；不能包含任何非常量成员，任何 field 都是隐含着 public static final 的意义；同时，没有非静态方法实现，也就是说要么是抽象方法，要么是静态方法。Java 标准类库中，定义了非常多的接口，比如 java.util.List。
+      > - 抽象类是不能实例化的类，用 abstract 关键字修饰 class，其目的`主要是代码重用`。除了不能实例化，形式上和一般的 Java 类并没有太大区别，可以有一个或者多个抽象方法，也可以没有抽象方法。抽象类大多用于`抽取相关 Java 类的共用方法实现或者是共同成员变量`，然后通过继承的方式达到代码复用的目的。Java 标准库中，比如 collection 框架，很多通用部分就被抽取成为抽象类，例如 java.util.AbstractList。
+
+21.   面向对象的基本要素：封装、继承、多态
+
+      > - **封装**的目的是`隐藏事务内部的实现细节，以便提高安全性和简化编程`。封装提供了合理的边界，避免外部调用者接触到内部的细节。我们在日常开发中，因为无意间暴露了细节导致的难缠 bug 太多了，比如在多线程环境暴露内部状态，导致的并发修改问题。从另外一个角度看，封装这种隐藏，也提供了简化的界面，避免太多无意义的细节浪费调用者的精力。
+      >
+      > - `继承是代码复用的基础机制`，类似于我们对于马、白马、黑马的归纳总结。但要注意，继承可以看作是非常紧耦合的一种关系，父类代码修改，子类行为也会变动。在实践中，过度滥用继承，可能会起到反效果。
+      >
+      > - **多态**，你可能立即会想到重写（override）和重载（overload）、向上转型。简单说，重写是父子类中相同名字和参数的方法，不同的实现；重载则是相同名字的方法，但是不同的参数，本质上这些方法签名是不一样的。
+      >
+      >   方法名称和参数一致，但是返回值不同这种不是重载，编译都会出错的。
+      >
+      > 
 
 # NIO与IO
 
@@ -93,25 +237,54 @@
 
 - [nio和io的实现](https://github.com/Snailclimb/JavaGuide/blob/master/docs/java/BIO-NIO-AIO.md)
 
+- [bio /nio/aio](https://www.cnblogs.com/aspirant/p/6877350.html)
+
   >`区别`
   >
   >1. io面向的是流，nio面向的是缓冲buffer或者说块；所以nio比io快很多；
-  > - java io是面向流，每次从中读取一个或者多个字节，直到读取所有的字节，它没有任何缓冲的地方；
-  > - nio则是面向缓冲区的，它将数据读取到缓存区，可以在缓冲区中前后移动获取到的数据，更灵活；
-  > - nio少了一次从内核空间到用户空间的拷贝，ByteBuffer.allocateDirect分配的内存使用的是本机内存而不是Java堆上的内存，和网络或者磁盘交互都在操作系统的内核空间中发生。
+  >- java io是面向流，每次从中读取一个或者多个字节，直到读取所有的字节，它没有任何缓冲的地方；
+  >- nio则是面向缓冲区的，它将数据读取到缓存区，可以在缓冲区中前后移动获取到的数据，更灵活；
   >2. io是阻塞的，nio是非阻塞的；
   >
-  >  - io的各种流是阻塞的。这意味着，一个请求来来后创建一个线程，当线程调用read/write方法时，该线程是被阻塞的，只能处理一个socket请求。直到一些数据被读取完，在此期间该线程不能干任何其他事；
-  >  - nio是非阻塞的，一个线程负责接口请求，其它多个线程请求写入一些数据到某个通道，不用等他完全写入，这个线程可以同时干别的事情，所以一个单独的线程现在可以管理多个输入和输出通道（channel）。
-  >  - NIO通讯是将整个任务切换成许多小任务，由一个线程负责处理所有io事件，并负责分发。它是利用事件驱动机制，而不是监听机制，事件到的时候再触发。NIO线程之间通过wait，notify等方式通讯。保证了每次上下文切换都有意义，减少无谓的进程切换。 
+  > - io的各种流是阻塞的。这意味着，一个请求来来后创建一个线程，当线程调用read/write方法时，该线程是被阻塞的，只能处理一个socket请求。直到一些数据被读取完，在此期间该线程不能干任何其他事；
+  > - nio是非阻塞的，一个线程负责接口请求，其它多个线程请求写入一些数据到某个通道，不用等他完全写入，这个线程可以同时干别的事情，所以一个单独的线程现在可以管理多个输入和输出通道（channel）。
+  > - NIO通讯是将整个任务切换成许多小任务，由一个线程负责处理所有io事件，并负责分发。它是利用事件驱动机制，而不是监听机制，事件到的时候再触发。NIO线程之间通过wait，notify等方式通讯。保证了每次上下文切换都有意义，减少无谓的进程切换。 
   >
   >3. io没有选择器，nio是有selector选择器，Selector(多路复用器)用于监听多个通道的事件（比如：连接打开，数据到达）。因此，单个线程可以监听多个数据通道
   >
-  >  
+  > 
   >
-  >bio是来一个请求开一个线程，nio是一个线程监听所有的套接字，监测到请求数据后，调用一个线程去处理，对于那些处理事件的线程来说，它多数时间都是在有效的工作，而bio，处理事件的线程亦是监听socket的线程，只要socket fd没准备好，这个线程就只能阻塞。同样1000个链接，使用nio，只需要10个线程就能搞定，使用bio得需要1000个线程。
+  >bio是来一个请求开一个线程，nio是一个线程监听所有的套接字，监测到内核缓存区的数据准备好后，调用一个线程去处理，对于那些处理事件的线程来说，它多数时间都是在有效的工作，而bio，处理事件的线程亦是监听socket的线程，只要socket fd没准备好，这个线程就只能阻塞。同样1000个链接，使用nio，只需要10个线程就能搞定，使用bio得需要1000个线程。
   >
-  >aio是真正的异步通知。nio是有一个线程监听多个socketChannal对应的缓冲区是否有数据准备好，ai是数据准备好直接回调对应的线程进行处理，是通知机制；
+  >nio是有一个线程监听多个socketChannal对应的缓冲区是否有数据准备好，事件监听机制。AIO是真正的异步通知，AIO是数据准备好直接回调对应的线程进行处理，使用的是事件和回调机制；
+  >
+  >
+  
+- nio的组成部分
+
+  > - Buffer，高效的数据容器，除了布尔类型，所有原始数据类型都有相应的 Buffer 实现。
+  >
+  > - Channel，类似在 Linux 之类操作系统上看到的文件描述符，是 NIO 中被用来支持批量式 IO 操作的一种抽象。
+  >
+  > - File 或者 Socket，通常被认为是比较高层次的抽象，而 Channel 则是更加操作系统底层的一种抽象，这也使得 NIO 得以充分利用现代操作系统底层机制，获得特定场景的性能优化，例如，DMA（Direct Memory Access）等。不同层次的抽象是相互关联的，我们可以通过 Socket 获取 Channel，反之亦然。 
+  > - Selector，是 NIO 实现多路复用的基础，它提供了一种高效的机制，可以检测到注册在 Selector 上的多个 Channel 中，是否有 Channel 处于就绪状态，进而实现了单线程对多 Channel 的高效管理。
+
+- 区分同步或异步  和 区分阻塞与非阻塞
+
+  > - `同步或异步`:  两个强调的是流程上的；简单来说，同步是一种可靠的有序运行机制，当我们进行同步操作时，后续的任务是等待当前调用返回，才会进行下一步；而异步则相反，其他任务不需要等待当前调用返回，通常依靠事件、回调等机制来实现任务间次序关系。
+  > - `阻塞与非阻塞` ：强调的事线程是否阻塞，在进行阻塞操作时，当前线程会处于阻塞状态，无法从事其他任务，只有当条件就绪才能继续，比如 ServerSocket 新连接建立完毕，或数据读取、写入操作完成；而非阻塞则是不管 IO 操作是否结束，直接返回，相应操作在后台继续处理。
+
+- io的的基本介绍
+
+  > - IO 不仅仅是对文件的操作，网络编程中，比如 Socket 通信，都是典型的 IO 操作目标。
+  >
+  > - 输入流、输出流（InputStream/OutputStream）是用于`读取或写入字节`的，例如操作图片文件。
+  > - 而 Reader/Writer 则是`用于操作字符`，增加了字符编解码等功能，适用于类似从文件中读取或者写入文本信息。本质上计算机操作的都是字节，不管是网络通信还是文件读取，Reader/Writer 相当于构建了应用逻辑和原始数据之间的桥梁。
+  > - BufferedOutputStream 等 `带缓冲区的实现，可以避免频繁的磁盘读写`，进而提高 IO 处理效率。这种设计利用了缓冲区，将批量数据进行一次操作，但在使用中千万别忘了 flush。
+
+- 
+
+- 
 
 # java泛型
 
@@ -156,10 +329,59 @@
    > - runnable接口中的run方法的返回值是void
    > - callable接口中的call方法的返回值是泛型的，一般配合future和futureTask对象获取异步操作的结果；  
 
-3. volatile关键字的作用 [volatile关键字深入解析](https://www.cnblogs.com/dolphin0520/p/3920373.html)
+2. volatile关键字的作用 [volatile关键字深入解析](https://www.cnblogs.com/dolphin0520/p/3920373.html)
 
    > - 保证了变量在多线程间的可见性，即线程读取到的数据都是最新的数据；
-   > - 禁止指令重排序；正常情况下jvm为了获取最佳的性能会进行指令重排序，多线程情况下有可能出现意想不到的问题
+   >
+   > - 禁止指令重排序；正常情况下jvm为了获取最佳的性能会进行指令重排序，多线程情况下有可能出现意想不到的问题。在进行指令优化时，不能将在对volatile变量访问的语句放在其后面执行，也不能把volatile变量后面的语句放到其前面执行。
+   >
+   >   ```java
+   >   public class Test {
+   >       public volatile int inc = 0;
+   >        
+   >       public void increase() {
+   >           inc++;
+   >       }
+   >        
+   >       public static void main(String[] args) {
+   >           final Test test = new Test();
+   >           for(int i=0;i<10;i++){
+   >               new Thread(){
+   >                   public void run() {
+   >                       for(int j=0;j<1000;j++)
+   >                           test.increase();
+   >                   };
+   >               }.start();
+   >           }
+   >            
+   >           while(Thread.activeCount()>1)  //保证前面的线程都执行完
+   >               Thread.yield();
+   >           System.out.println(test.inc);
+   >       }
+   >   }
+   >   ```
+   >
+   >   也许有些朋友认为是10000。但是事实上运行它会发现每次运行结果都不一致，都是一个小于10000的数字。因为volatile关键字能保证可见性没有错，但是上面的程序错在没能保证原子性。可见性只能保证每次读取的是最新的值，但是volatile没办法保证对变量的操作的原子性。
+   >
+   >   `举例`
+   >
+   >   ```
+   >   假如某个时刻变量inc的值为10，
+   >   
+   >   　　线程1对变量进行自增操作，线程1先读取了变量inc的原始值，然后线程1被阻塞了；
+   >   
+   >   　　然后线程2对变量进行自增操作，线程2也去读取变量inc的原始值，由于线程1只是对变量inc进行读取操作，而没有对变量进行修改操作，所以不会导致线程2的工作内存中缓存变量inc的缓存行无效，所以线程2会直接去主存读取inc的值，发现inc的值时10，然后进行加1操作，并把11写入工作内存，最后写入主存。
+   >   
+   >   　　然后线程1接着进行加1操作，由于已经读取了inc的值，注意此时在线程1的工作内存中inc的值仍然为10，所以线程1对inc进行加1操作后inc的值为11，然后将11写入工作内存，最后写入主存。
+   >   
+   >   　　那么两个线程分别进行了一次自增操作后，inc只增加了1。
+   >   
+   >   　　解释到这里，可能有朋友会有疑问，不对啊，前面不是保证一个变量在修改volatile变量时，会让缓存行无效吗？然后其他线程去读就会读到新的值，对，这个没错。这个就是上面的happens-before规则中的volatile变量规则，但是要注意，线程1对变量进行读取操作之后，被阻塞了的话，并没有对inc值进行修改。然后虽然volatile能保证线程2对变量inc的值读取是从内存中读取的，但是线程1没有进行修改，所以线程2根本就不会看到修改的值。
+   >   
+   >   　　根源就在这里，自增操作不是原子性操作，而且volatile也无法保证对变量的任何操作都是原子性的。
+   >   ```
+   >
+   >   
 
 4. volatile是如何保证内存可见性的 
 
@@ -169,7 +391,7 @@
 
 4. volatile是如何保证有序性的
 
-   > - 观察他的汇编语言，加入volatile关键字后，会在总线加一个lock锁前缀指令，它确保指令重排序时不会把其后面的指令排到内存屏障之前的位置，也不会把前面的指令排到内存屏障的后面
+   > - 观察他的汇编语言，加入volatile关键字后，会在总线加一个lock锁前缀指令。lock前缀指令实际上相当于一个内存屏障（也成内存栅栏），它确保指令重排序时不会把其后面的指令排到内存屏障之前的位置，也不会把前面的指令排到内存屏障的后面
 
 5. sleep和wait方法的区别
 
@@ -341,16 +563,27 @@
     > 3. syn阻塞，volatile线程不阻塞；
     > 4. syn编译器优化，volatile不优化；
 
-22. 悲观锁和乐观锁
+22. 什么情况下synchronized关键字可以代替volatile
+
+    >    synchronized关键字是防止多个线程同时执行一段代码，那么就会很影响程序执行效率，而volatile关键字在某些情况下性能要优于synchronized，但是要注意volatile关键字是无法替代synchronized关键字的，因为volatile关键字无法保证操作的原子性。通常来说，使用volatile必须具备以下2个条件：
+    >
+    > - 对变量的写操作不依赖于当前值
+    > - 该变量没有包含在具有其他变量的不变式中
+    >
+    >  其实上面的2个条件需要保证操作是原子性操作，才能保证使用volatile关键字的程序在并发时能够正确执行。
+    >
+    > 
+
+23. 悲观锁和乐观锁
 
     > - 乐观锁是假设并发冲突不会发生，总是不加锁的执行操作，如果失败，则会进行重试；
     > - 悲观锁是假设冲突会发生，执行操作的时候就加一个独占锁；
 
-23. cas是什么
+24. cas是什么
 
     > cas就是comare and swap，就是内存值V，旧值A，要修改的值b，只有当预期值A与内存的值V相等时才执行设置值为b，并且返回成功，否则返回失败；一般是配合volatile关键字使用，才可以保证拿到的变量主内存中的值，修改后可以将值设置到主内存中去；
 
-24. java内存模型  ***
+25. java内存模型  ***
 
     > 1. java内存模型分为主内存和工作内存，共享变量保存在主内存中，每一个线程需要修改和读取共享变量的时候都要从主内存中copy一份到自己的工作内存中，修改完后会写到主内存中去；
     >
@@ -373,7 +606,7 @@
     >
     > 5. 指令重排序，只要和源代码产生的结果一样，编译器会进行操作的重排序，提升计算机性能；
 
-25. Happens-before 关系
+26. Happens-before 关系
 
     > 如果线程 A 与线程 B 满足 happens-before 关系，则线程 A 执行动作的结果对于线程 B 是可见的
     >
@@ -382,7 +615,7 @@
     > - Volatile 变量法则：对一个Volatile变量的写操作先行发生于后面对这个变量的读操作
     > - 传递性：如果 A happens-before 于 B，且 B happens-before C，则 A happens-before C。
 
-26. Thread.sleep(0)的作用是什么
+27. Thread.sleep(0)的作用是什么
 
     > 由于java使用抢占式调度算法，而sleep操作可以放弃cpu的执行时间，这样可以操作系统重新进行一次操作系统重新分配时间片的操作；  
 
@@ -967,12 +1200,55 @@
 # 设计模式 ?
 
 - 单例模式（2种模式以及调优）
+
+  > ```java
+  > public class DoubleCheckedLocking {                     //1
+  >     private static Instance instance;                   //2
+  >     public  static Instance getInstance(){              //3
+  >         if(instance ==null) {                           //4:第一次检查
+  >             synchronized (DoubleCheckedLocking.class) { //5：加锁
+  >                 if (instance == null)                   //6：第二次检查
+  >                     instance = new Instance();          //7：问题的根源处在这里
+  >             }                                           //8
+  >         }                                               //9
+  >         return instance;                                //10
+  >     }                                                   //11
+  > }
+  > ```
+  >
+  > 1. 如果第一次检查instance不为null，那就不需要执行下面的加锁和初始化操作。因此，可以大幅降低synchronized带来的性能开销（原先是在getInstance()方法上加synchronized方法）。
+  > 2. 这样似乎很完美，但这是一个错误的优化！在线程执行到第4行，代码读取到instance不为null时，`instance引用的对象可能还没有完成初始化`。
+  >
+  > - 问题的根源
+  >
+  >    前面的双重检查示例代码第7行创建了一个对象。这一行代码可以分解为如下的3行伪代码。
+  >
+  >   ```java
+  >   memory=allocate();        //1:分配对象的内存空间
+  >   ctorInstance(memory);     //2:初始化对象
+  >   instance = memory;          //3:设置instance指向刚分配的内存地址
+  >   ```
+  >
+  >    2和3有可能会进行重排序；DoubleCheckedLocking代码第7行（instance=new  Instance()；）如果发生重排序，拎一个并发执行的线程B就有可能在第4行判断instance不为null。线程B接下来访问instance所引用的对象，但此时这个对象可能还没有被A线程初始化！
+  >
+  >   - 解决方案
+  >
+  >   ```java
+  >   private volatile static Instance instance
+  >   ```
+
 - 工厂模式 （静态工厂模式、工厂方法模式、抽象工厂模式）
+
 - 策略模式
+
 - 代理模式
+
 - 模板方法模式
+
 - 适配器模式
+
 - [动态代理模式](https://www.cnblogs.com/gonjan-blog/p/6685611.html)
+
 - [23种设计模式](https://blog.csdn.net/jason0539/article/details/44956775)
 
 # mybatis 
@@ -1200,6 +1476,15 @@
     > 无法解决通过构造器注入构成的循环依赖，只能抛出BeanCurrentylyInCreationException异常表示循环依赖。
     >
     > 通过Spring容器提前暴露刚完成构造器注入但未完成其他步骤（如setter注入）的bean来完成的。`通过提前暴露一个单例工厂方法，从而使其他bean能够引用到该bean`
+    
+15. spring用到了哪些设计模式
+
+    > -  [BeanFactory](https://github.com/spring-projects/spring-framework/blob/master/spring-beans/src/main/java/org/springframework/beans/factory/BeanFactory.java)和[ApplicationContext](https://github.com/spring-projects/spring-framework/blob/master/spring-context/src/main/java/org/springframework/context/ApplicationContext.java)应用了工厂模式。
+    >
+    > - 在 Bean 的创建中，Spring 也为不同 scope 定义的对象，提供了单例和原型等模式实现。
+    > - AOP 领域则是使用了代理模式、装饰器模式、适配器模式等。
+    > - 各种事件监听器，是观察者模式的典型应用。
+    > - 类似 JdbcTemplate 等则是应用了模板模式。
 
 # mongodb
 
@@ -1874,6 +2159,29 @@
   >      ```
   >
   >      https://upload-images.jianshu.io/upload_images/6302559-7cdb7b7aeebec44b.png
+  >    
+  > 3. 查询逻辑
+  >
+  >    - zscore的查询，不是由skiplist来提供的，而是由那个dict来提供的。
+  >
+  >    - 为了支持排名(rank)，Redis里对skiplist做了扩展，使得根据排名能够快速查到数据，或者根据分数查到数据之后，也同时很容易获得排名。而且，根据排名的查找，时间复杂度也为O(log n)。
+  >
+  >    - zrevrange的查询，是根据排名查数据，由扩展后的skiplist来提供。
+  >
+  >    - zrevrank是先在dict中由数据查到分数，再拿分数到skiplist中去查找，查到后也同时获得了排名。
+  >
+  > 4. 时间复杂度
+  >
+  >    - zscore只用查询一个dict，所以时间复杂度为O(1)
+  >    - zrevrank, zrevrange, zrevrangebyscore由于要查询skiplist，所以zrevrank的时间复杂度为O(log n)，而zrevrange, zrevrangebyscore的时间复杂度为O(log(n)+M)，其中M是当前查询返回的元素个数。
+
+- [为什么会用跳表来实现zset而不用红黑树]([https://syt-honey.github.io/2019/03/23/17-%E8%B7%B3%E8%A1%A8%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88Redis%E4%B8%80%E5%AE%9A%E8%A6%81%E7%94%A8%E8%B7%B3%E8%A1%A8%E6%9D%A5%E5%AE%9E%E7%8E%B0%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88%EF%BC%9F/](https://syt-honey.github.io/2019/03/23/17-跳表：为什么Redis一定要用跳表来实现有序集合？/))
+
+  > - 其中，插入、删除、查找以及迭代输出有序序列，红黑树也可以完成，时间复杂度和跳表一样。但是按照区间来查找数据这个操作，红黑树的效率没有跳表高。
+  >
+  > - 对于按照区间查找数据这个操作，跳表可以做到O(logn)的时间复杂度定位区间的起点，然后在原始链表中顺序往后遍历就可以了。
+  > - redis之所以用跳表来实现有序集合还有其它的原因。比如，相比于红黑树，跳表的代码看起来更易于理解、可读性更好也不容易出错。而且跳表也更加的灵活，他可以通过改变索引构建策略，有效平衡执行效率和内存消耗。
+  > - 不过，跳表也不能完全代替红黑树。红黑树比跳表出现的更早一些，很多编程语言中的Map类型都是基于红黑树实现的，当我们做业务开发的时候直接拿来用就好了，但是对于跳表我们就需要手动实现了。
 
 - [redis分布式锁](https://blog.csdn.net/yb223731/article/details/90349502)
 
