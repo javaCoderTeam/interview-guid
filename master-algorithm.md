@@ -10,19 +10,19 @@
 
 # 数组
 
-1. 二维数组查找   ArrayFind
+1. 二维数组查找   ArrayFind [240. 搜索二维矩阵 II](https://leetcode-cn.com/problems/search-a-2d-matrix-ii/)
 
 > 二维数组，从上到下递增；从左到右递增，查找二维数组中是否含有某个整数  
 
-2. 二分查找 Bsearch
+2. 二分查找 Bsearch [704. 二分查找](https://leetcode-cn.com/problems/binary-search/)
 
 > 递归实现 
 >
 > 非递归实现
 
-3. 合并两个有序数组 ArraySort 
+3. 合并两个有序数组 ArraySort [88. 合并两个有序数组](https://leetcode-cn.com/problems/merge-sorted-array/)
 
-4. 从外到里顺时针打印二维数组  TestClockwiseOutput
+4. 从外到里顺时针打印二维数组  TestClockwiseOutput [剑指 Offer 29. 顺时针打印矩阵](https://leetcode-cn.com/problems/shun-shi-zhen-da-yin-ju-zhen-lcof/)
 
 5. 两个元素之和 ArraySum [Leetcode-1](https://leetcode-cn.com/problems/two-sum/)
 
