@@ -69,8 +69,6 @@
      >   // finally代码块中的代码不会被执行
      >   ```
      >
-     >   
-     >
      > - finalize 是基础类 java.lang.Object 的一个方法，它的设计目的是保证对象在被垃圾收集前完成特定资源的回收。finalize 机制现在已经不推荐使用，并且在 JDK 9 开始被标记为 deprecated。
      
 9.   String、StringBuffer、StringBuilder 有什么区别？
@@ -214,8 +212,8 @@
 
 20.   谈谈接口和抽象类有什么区别？
 
-      > - `接口是对行为的抽象，它是抽象方法的集合`，利用接口可以达到 API 定义和实现分离的目的。接口，不能实例化；不能包含任何非常量成员，任何 field 都是隐含着 public static final 的意义；同时，没有非静态方法实现，也就是说要么是抽象方法，要么是静态方法。Java 标准类库中，定义了非常多的接口，比如 java.util.List。
-      > - 抽象类是不能实例化的类，用 abstract 关键字修饰 class，其目的`主要是代码重用`。除了不能实例化，形式上和一般的 Java 类并没有太大区别，可以有一个或者多个抽象方法，也可以没有抽象方法。抽象类大多用于`抽取相关 Java 类的共用方法实现或者是共同成员变量`，然后通过继承的方式达到代码复用的目的。Java 标准库中，比如 collection 框架，很多通用部分就被抽取成为抽象类，例如 java.util.AbstractList。
+      > - `接口是对行为的抽象，对方法的抽象，它是抽象方法的集合`，利用接口可以达到 API 定义和实现分离的目的。接口，不能实例化；不能包含任何非常量成员，任何 field 都是隐含着 public static final 的意义；同时，没有非静态方法实现，也就是说要么是抽象方法，要么是静态方法。Java 标准类库中，定义了非常多的接口，比如 java.util.List。
+      > - `抽象类是对类的抽象`， 抽象类是不能实例化的类，用 abstract 关键字修饰 class，其目的`主要是代码重用`。除了不能实例化，形式上和一般的 Java 类并没有太大区别，可以有一个或者多个抽象方法，也可以没有抽象方法。抽象类大多用于`抽取相关Java 类的共用方法实现或者是共同成员变量`，然后通过继承的方式达到代码复用的目的。Java 标准库中，比如 collection 框架，很多通用部分就被抽取成为抽象类，例如 java.util.AbstractList。
 
 21.   面向对象的基本要素：封装、继承、多态
 
@@ -263,7 +261,7 @@
       > Found 1 deadlock.
       > ```
 
-23.   java并发包提供了哪些工具类
+23.   java并发包提供了哪些工具类 ***
 
       > - 提供了比 synchronized 更加高级的各种同步结构，包括 CountDownLatch、CyclicBarrier、Semaphore 、reentrantLock、reentrantReadWriteLock等，可以实现更加丰富的多线程操作，比如利用 Semaphore 作为资源控制器，限制同时进行工作的线程数量。
       > - 各种线程安全的容器，比如最常见的 ConcurrentHashMap、有序的 ConcunrrentSkipListMap，或者通过类似快照机制，实现线程安全的动态数组 CopyOnWriteArrayList 等。
@@ -301,7 +299,7 @@
   >
   > - io的各种流是阻塞的。这意味着，一个请求来来后创建一个线程，当线程调用read/write方法时，该线程是被阻塞的，只能处理一个socket请求。直到一些数据被读取完，在此期间该线程不能干任何其他事；
   > - nio是非阻塞的，一个线程负责接口请求，其它多个线程请求写入一些数据到某个通道，不用等他完全写入，这个线程可以同时干别的事情，所以一个单独的线程现在可以管理多个输入和输出通道（channel）。
-  > - NIO通讯是将整个任务切换成许多小任务，由一个线程负责处理所有io事件，并负责分发。它是利用事件驱动机制，而不是监听机制，事件到的时候再触发。NIO线程之间通过wait，notify等方式通讯。保证了每次上下文切换都有意义，减少无谓的进程切换。 
+  > - NIO通讯是将整个任务切换成许多小任务，由一个线程负责处理所有io事件，并负责分发。它是利用事件监听机制，而不是阻塞监听机制，事件到的时候再触发。NIO线程之间通过wait，notify等方式通讯。保证了每次上下文切换都有意义，减少无谓的进程切换。 
   >
   >3. io没有选择器，nio是有selector选择器，Selector(多路复用器)用于监听多个通道的事件（比如：连接打开，数据到达）。因此，单个线程可以监听多个数据通道
   >
@@ -325,7 +323,7 @@
 - 区分同步或异步  和 区分阻塞与非阻塞
 
   > - `同步或异步`:  两个强调的是流程上的；简单来说，同步是一种可靠的有序运行机制，当我们进行同步操作时，后续的任务是等待当前调用返回，才会进行下一步；而异步则相反，其他任务不需要等待当前调用返回，通常依靠事件、回调等机制来实现任务间次序关系。
-  > - `阻塞与非阻塞` ：强调的事线程是否阻塞，在进行阻塞操作时，当前线程会处于阻塞状态，无法从事其他任务，只有当条件就绪才能继续，比如 ServerSocket 新连接建立完毕，或数据读取、写入操作完成；而非阻塞则是不管 IO 操作是否结束，直接返回，相应操作在后台继续处理。
+  > - `阻塞与非阻塞` ：强调的是线程是否阻塞，在进行阻塞操作时，当前线程会处于阻塞状态，无法从事其他任务，只有当条件就绪才能继续，比如 ServerSocket 新连接建立完毕，或数据读取、写入操作完成；而非阻塞则是不管 IO 操作是否结束，直接返回，相应操作在后台继续处理。
 
 - io的的基本介绍
 
@@ -352,7 +350,7 @@
     >      * @param tClass 传入的泛型实参
     >      * @return T 返回值为T类型
     >      * 说明：
-    >      *     1）public 与 返回值中间<T非常重要，可以理解为声明此方法为泛型方法。
+    >      *     1）public 与 返回值中间<T>非常重要，可以理解为声明此方法为泛型方法。
     >      *     2）只有声明了<T的方法才是泛型方法，泛型类中的使用了泛型的成员方法并不是泛型方法。
     >      *     3）<T表明该方法将使用泛型类型T，此时才可以在方法中使用泛型类型T。
     >      *     4）与泛型类的定义一样，此处T可以随便写为任意标识，常见的如T、E、K、V等形式的参数常用于表示泛型。
@@ -474,7 +472,7 @@
 
    >- 线程池底层其实是使用HashSet存储Runnable对象，多余的任务放到阻塞队列
 
-10. [ThreadPoolExecutor线程池的参数](https://www.cnblogs.com/superfj/p/7544971.html)
+10. [ThreadPoolExecutor线程池的参数](https://www.cnblogs.com/superfj/p/7544971.html)  ***
 
     > `核心参数`：
     >
@@ -709,16 +707,6 @@
     > 3. syn阻塞，volatile线程不阻塞；
     > 4. syn编译器优化，volatile不优化；
 
-26. 什么情况下synchronized关键字可以代替volatile
-
-    >    synchronized关键字是防止多个线程同时执行一段代码，那么就会很影响程序执行效率，而volatile关键字在某些情况下性能要优于synchronized，但是要注意volatile关键字是无法替代synchronized关键字的，因为volatile关键字无法保证操作的原子性。通常来说，使用volatile必须具备以下2个条件：
-    >
-    > - 对变量的写操作不依赖于当前值
-    > - 该变量没有包含在具有其他变量的不变式中
-    >
-    >  其实上面的2个条件需要保证操作是原子性操作，才能保证使用volatile关键字的程序在并发时能够正确执行。
-    >
-
 27. 悲观锁和乐观锁
 
     > - 乐观锁是假设并发冲突不会发生，总是不加锁的执行操作，如果失败，则会进行重试；
@@ -939,11 +927,11 @@
 
 10. hashMap的modCount用来的作用
 
-   > modCount字段是用来记录hashmap内部结构发生变化的次数，主要用于迭代的快速失败。例如put新键值对，如果某个key对应的value被覆盖不属于结构变化。遍历过程中改变hashMap的内部机构则会出现ConcurrentModificationException。
+   > modCount字段是用来记录hashmap内部结构发生变化的次数，主要用于迭代的快速失败。例如put新键值对，如果某个key对应的value被覆盖不属于结构变化。遍历过程中改变hashMap的内部结构则会出现ConcurrentModificationException。
 
 11. 多线程操作hashMap会出现什么问题
 
-    > - 在rehash时会出现死循环；rehash会重新将原数组的内容重新hash到新的扩容数组中，在多线程的环境下，存在同时其他的元素也在进行put操作，如果hash值相同，可能出现同时在同一数组下用链表表示，造成闭环，导致在get时会出现死循环
+    > - 在rehash时会出现死循环；rehash会重新将原数组的内容重新hash到新的扩容数组中，在多线程的环境下，由于采用的是头插法，会造成闭环。导致在get时定位到该槽位时，且元素不存在的情况下会出现死循环
     > - 在遍历的时候修改hashmap的结构，会出现concurrentModifyException，fail-fast机制
 
 12. [linkHashMap](https://www.imooc.com/article/22931)
@@ -1136,10 +1124,10 @@
     > - 由于机器数量少存在一致性hash倾斜的问题，可以使用虚拟节点来减少节点失效的影响。
     >
     > 1、2、3、4、5、6、7、8、9
->
+    >
     > A：1、4、7；B：2、5、8；C：3、6、9
-    
-    
+
+​    
 
 # 队列
 
@@ -1168,8 +1156,8 @@
    > - java虚拟机栈：线程私有，每个方法执行的时候都会创建一个栈帧，方法执行过程对应着栈帧入栈和出栈的过程；存储局部变量表、操作数栈、动态链接、方法返回值等；包含基本数据类型和对象的引用；
    > - 本地方法栈：和虚拟机栈一样，不过是为虚拟机的native方法服务；
    > - java堆：是线程共享的，是垃圾回收的主要区域；主要包括所有的对象实例、包括数组；
-   > - 方法区：线程共享，虚拟机加载的类的结构信息、字段、方法代码。也就是老年代；回收目标主要是常量池的回收和类型的卸载。jdk1.8使用metaSpace来代替永久代方法区；
-   > - 运行时常量池：是方法区的一部分，主要包括常量池，比如integer的-127-128；1.8中转移到堆中；
+   > - 方法区：线程共享，虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。也就是老年代；回收目标主要是常量池的回收和类型的卸载。jdk1.8使用metaSpace来代替永久代方法区；
+   > - 运行时常量池：是方法区的一部分，运行时的常量池，比如integer的-127-128；1.8中转移到堆中；
    > - 直接内存：也叫堆外内存，不是jvm的运行区域的一部分，是java1.4加入的NIO可以使用native方法直接分配堆外内存，Java堆中的DirectByteBuffer对象作为这块内存的引用进行操作。
 
 2. HotSpot虚拟机
@@ -1212,7 +1200,7 @@
    >
    > - 本地方法栈中JNI（即一般说的Native方法）引用的对象；
    >
-   > - 方法区中静态属性引用的对象，常量引用的对象
+   > - 方法区中静态变量引用的对象，常量引用的对象
 
    6. 对象被回收的过程
 
@@ -1255,16 +1243,15 @@
    12. 垃圾收集器 ***
 
    > Serial 收集器是针对新生代的收集器，单线程收集器，采用的是复制算法；
-   > Parnew（并行）收集器，Serial的多线程版本 新生代采用复制算法，cms的搭配使用；
-   > Parallel Scavenge（并行）收集器，针对新生代，采用复制收集算法，关注的是`吞吐量`；
-   > Serial Old（串行）收集器，老年代采用标记清理
+   > Parnew收集器，Serial的多线程版本 新生代采用复制算法，cms的搭配使用；
+   > Parallel Scavenge（并行收集器）收集器，针对新生代，采用复制收集算法，关注的是`吞吐量`；-XX:GCTimeRatio是设置吞吐量的大小，
+   > Serial Old 收集器，老年代采用标记整理
    > Parallel Old（并行）收集器，针对老年代，标记整理
    > CMS收集器，基于标记清理，老年代收集器，注重的是`最短停顿时间`；
    > G1收集器(JDK)：整体上是基于标记-整理，分代收集
    > 综上：新生代基本采用复制算法，老年代采用标记整理算法。cms采用标记清除
->
-   > - client vm mode（win 32）一直是Seiral GC，servermode下，9以后改为了G1，以前是Parrallel Gc
-
+   >
+   > client vm mode（win 32）一直是Seiral GC，servermode下，9以后改为了G1，以前是Parrallel Gc
    13. CMS 收集器与G1收集器 ***
 
    > CMS垃圾收集器
@@ -1346,7 +1333,7 @@
    >
    > - new实例或者调用类的静态变量；
    > - 初始化子类的时候触发父类初始化
-   > - 反射方式执行以上行为；
+   > - 使用java.lang.reflect包的方式对类进行反射调用的时候
    > - 作为程序入口的主类；
    >
    > 类加载的过程：
@@ -1355,7 +1342,7 @@
    >
    > 1. 装载：jvm将字节码文件以二进制的方式读入到内存中，解释器转变为机器码，转化为运行时数据结构；
    > 2. 连接：主要做加载完的准备工作，`验证被加载的文件是否符合java以及jvm规范`；`为类变量分配内存空间和设置初始值的阶段；`  `虚拟机将符号引用替换为直接引用的过程`；
-   > 3. 初始化：根据程序代码去初始化类变量和其他资源
+   > 3. 初始化：根据程序代码去初始化类变量和其他资源；
 
 
    17. 两种主动加载方式
@@ -1390,7 +1377,7 @@
    日志详见catalina.out日志
    
    2. 使用jstack查找进程下的线程信息
-   第一步：top                   #### 找进程
+   第一步：top          输入大写P 按照cpu使用情况排序         #### 找进程
    第二步：top -Hp pid           #### 看具体线程使用系统资源情况
    第三步：printf "%x\n"         #####线程id 10进制的线程id转十六进制的线程id
    第四步:jstack pid | grep     -> jstat.txt #####线程id,如果要看详细的就把 jstack pid  到具体文件
@@ -1426,7 +1413,7 @@
     > - 验证是否达到调优目标，如果达到目标，即可以考虑结束调优；否则，重复完成分析、调整、验证这个过程。
 
 
-   
+
 
 # 设计模式 ?
 
@@ -1434,7 +1421,7 @@
 
   > ```java
   > public class DoubleCheckedLocking {                     //1
-  >     private static Instance instance;                   //2
+  >     private  static  Instance instance;                   //2
   >     public  static Instance getInstance(){              //3
   >         if(instance ==null) {                           //4:第一次检查
   >             synchronized (DoubleCheckedLocking.class) { //5：加锁
@@ -1485,7 +1472,7 @@
 > - 建造者模式   创建bean的时候使用建造者模式，不用使用多个构造函数，不用使用set方法
 > - 模板方法模式（消费答题记录的场景，一个是做学员的统计相关的，一个是算试题的正答率。它的公共模式 获取消费者客户端、设置消费者组，解析订阅的topic列表，拉取消息、过滤消息、进行计算和业务处理、commit。 不同的是设置消费者组、过滤，具体的入库逻辑不同等抽象方法；
 > - 策略模式（智能推题场景下获取试题列表的接口，提供三种策略。按照自己做错的试题，按照题库中所有的错误正答率，按照自己的收藏试题）
-> - 单例模式 创建kafka消费者客户端，使用单例模式；
+> - 单例模式 创建kafka生产者客户端，使用单例模式；
 > - 适配器模式：新加接口的时候，原有的逻辑差不多，只是入参不同，加部分逻辑。  新建一个接口，在实际工作中，适配器模式大多用在代码后期维护，和复用代码以及改写工具类。
 >   https://zhuanlan.zhihu.com/p/98718949
 >
@@ -1520,9 +1507,9 @@
    > 2. 通过mybatis的Config.xml中的配置生成SqlSessionFactory，默认实现DefaultSqlSessionFactory；
    > 3. 通过SqlSessionFactory生成sqlSesstion，即默认的defaulSqlSesstion；
    > 4. 通过sqlSesstion的getMapper方法获取对应的mapper接口，（其实是通过configuration类中的MapperProxyRegister类获取的对应的mapper接口的代理类）
-   > 5. 然后执行mapper接口中的方法，通过代理类实现了invocationHandler接口，执行动态代理；把操作委托给Excutor接口query方法来执行；
+   > 5. 然后执行mapper接口中的方法，通过代理类实现了invocationHandler接口，执行动态代理；把操作委托给Executor接口中对应的方法比如query、update、commit等方法来执行；
    > 6. 然后找到对应的statement或者prepareStatement来执行sql。
-   > 7. Mapped Statement也是mybatis一个底层封装对象，它包装了mybatis配置信息及sql映射信息等，Mapped Statement在执行sql后将输出结果映射至java对象中
+   > 7. Mapped Statement也是mybatis一个底层封装对象，它包装了mybatis配置信息及sql映射信息等，Mapped Statement在执行sql后将输出结果映射至java对象中；
 
 # springboot  
 
@@ -1591,7 +1578,7 @@
    >
    >   [springboot的流程](https://www.jianshu.com/p/0d196ad23915)
    >
-   >   - 在jar包下的META-INF/spring.factories下有org.springframework.boot.autoconfigure.EnableAutoConfiguration说下下有多个需要注入的autoConfigration配置文件；
+   >   - 在jar包下的META-INF/spring.factories下有org.springframework.boot.autoconfigure.EnableAutoConfigurations属性下有多个需要注入的autoConfigration配置文件；
    >   - 在main方法启动的时候在SpringApplication类下的构造方法中，会获取到springFactoryLoader的类加载器类来查找指定的接口实现类并实例化。
    >   - 其中loadFactoryNames方法是从指定位置查找指定接口的实现类的全限定名；
    >   - 使用instantiateFactory 根据类名的全限定名称实例化；
@@ -1604,7 +1591,7 @@
 
 # springMVC
 
-1. [springmvc的原理流程](https://www.cnblogs.com/wang-meng/p/5701987.html)
+1. [springmvc的原理流程](https://www.jianshu.com/p/8a20c547e245)
 
    > - 客户端请求提交到DispatcherServlet
    >
@@ -1617,6 +1604,8 @@
 
 [ioc的源码解析](https://javadoop.com/post/spring-ioc)
 
+[Spring容器IOC初始化过程](https://juejin.im/post/5ab30714f265da237b21fbcc#heading-0)
+
 [Spring常见问题](http://blog.csdn.net/qq1137623160/article/details/71194429) 
 
 1. [BeanFactory和ApplicationContext有什么区别](https://www.jianshu.com/p/fd8e441b98c8)
@@ -1625,22 +1614,20 @@
    >
    > 1. BeanFactory：是Spring里面最底层的接口，包含了各种Bean的定义，读取bean配置文档，管理bean的加载、实例化，控制bean的生命周期，维护bean之间的依赖关系。ApplicationContext接口作为BeanFactory的派生，除了提供BeanFactory所具有的功能外，还提供了更完整的框架功能：
    >
-   >    ①继承MessageSource，因此支持国际化。
+   >    ①继承MessageSource，因此支持国际化；
    >
-   >    ②统一的资源文件访问方式。
+   >    ② 支持获取环境属性，Enviroment对象，包括jdk、profile等属性；
    >
-   >    ③提供在监听器中注册bean的事件。
+   >    ③统一的资源文件访问方式，定义了resource接口；
    >
-   >    ④同时加载多个配置文件。
+   >    ④提供在监听器中注册bean的事件；
    >
-   >    ⑤载入多个（有继承关系）上下文 ，使得每一个上下文都专注于一个特定的层次，比如应用的web层。
-   >
-   > 2. ①BeanFactroy采用的是延迟加载形式来注入Bean的，即只有在使用到某个Bean时(调用getBean())，才对该Bean进行加载实例化。这样，我们就不能发现一些存在的Spring的配置问题。如果Bean的某一个属性没有注入，BeanFacotry加载后，直至第一次使用调用getBean方法才会抛出异常。springApplicationContext容器启动时会实例化非懒加载和单例的bean；
+   > 2. ①BeanFactroy采用的是延迟加载形式来注入Bean的，即只有在使用到某个Bean时(调用getBean())，才对该Bean进行加载实例化。这样，我们就不能发现一些存在的Spring的配置问题。springApplicationContext容器启动时会实例化非懒加载和单例的bean；
    >
    > 3. BeanFactory通常以编程的方式被创建，ApplicationContext还能以声明的方式创建，如使用ContextLoader。
    >
    > 4. BeanFactory和ApplicationContext都支持BeanPostProcessor、BeanFactoryPostProcessor的使用，但两者之间的区别是：BeanFactory需要手动注册，而ApplicationContext则是自动注册。
-
+   
 2. spring的好处
 
    > - 轻量： Spring 是轻量的，基本的版本大约2MB。
@@ -1686,7 +1673,7 @@
 
    > 将@Qualifier 注解和@Autowire 注解结合使用以消除这种混淆
 
-10. [spring生命周期](https://www.jianshu.com/p/3944792a5fff)
+10. [spring生命周期 ***](https://www.jianshu.com/p/3944792a5fff)
 
     > 生命周期执行的过程如下:
     >
@@ -1725,7 +1712,7 @@
 
     > Spring中AOP代理由Spring的IOC容器负责生成、管理，其依赖关系也由IOC容器负责管理。
     >
-    > 1. 默认使用Java动态代理来创建AOP代理，这样就可以为任何接口实例创建代理了;
+    > 1. 默认使用Java提供的jdk动态代理来创建AOP代理，这样就可以为任何接口实例创建代理了;
     > 2. 当需要代理的类不是代理接口的时候，Spring会切换为使用CGLIB代理，也可强制使用CGLIB;
     >
     > 步骤：
@@ -1740,11 +1727,11 @@
 
     [CGLIB动态代理实例](https://blog.csdn.net/yhl_jxy/article/details/80633194)
 
-    > - JDK动态代理只能对实现了接口的类生成代理，而不能针对类；此时代理对象和目标对象实现了相同的接口，目标对象作为代理对象的一个属性，具体接口实现中，可以在调用目标对象相应方法前后加上其他业务处理逻辑；
+    > - JDK动态代理只能对实现了接口的类生成代理，而不能针对类；目标对象作为代理对象的一个属性，具体接口实现中，可以在调用目标对象相应方法前后加上其他业务处理逻辑；
     >
-    > 代码层面主要是通过proxy类的newProxyInstance方法生成代理类；实现InvocationHandler接口的invoke方法，注入被代理类，执行以前的方法；
+    > 代码层面主要是通过proxy类的newProxyInstance方法生成代理类；通过实现InvocationHandler接口的invoke方法，注入被代理类，执行以前的方法；
     >
-    > - CGLIB是针对类实现代理，主要是对指定的类生成一个子类，覆盖其中的方法（继承）；它使用的是`字节码生产技术`，生成的代理类，不能代理被final修饰的属性或者类；
+    > - CGLIB是针对类实现代理，主要是对指定的类生成一个子类，覆盖其中的方法（继承）；它使用的是`字节码生产技术`，在编译的时候生成的代理类，不能代理被final修饰的属性或者类；
     >
     > jdk创建的快，cglib运行的快；
 
@@ -2201,8 +2188,7 @@
    > - 服务器方要处理大量的客户端的连接（生命周期短。但是每秒很多客户端请求）；这个时候如果服务端主动关闭连接，则会出现大量的time_wait状态；
    >
    > `三次握手和四次挥手`：在TCP连接中，服务器端的SYN和ACK向客户端发送是一次性发送的，而在断开连接的过程中， B端向A端发送的ACK和FIN是分两次发送的。因为在B端接收到A端的FIN后， B端可能还有数据要传输，所以先发送ACK，等B端处理完自己的事情后就可以发送FIN断开连接了。
-   >
-
+   
 8. tcp如何保证可靠传输  ***
 
    >  `序列号、确认机制、超时重传去重、拥塞控制`
@@ -2381,7 +2367,7 @@
   >   ```tiki wiki
   >   加入要判断用户是否存在缓存中
   >   1. 初始化一个20亿的数组； 20亿/8/1024/2014 = 238M
-  >   2. 把所有的数据库的用户id进行取hash然后对20亿取余，计算出在布隆过滤器的位置，设置为1；新增的数据插入数据库中，同事布隆过滤对应的位置也设置为1；
+  >   2. 把所有的数据库的用户id进行取hash然后对20亿取余，计算出在布隆过滤器的位置，设置为1；新增的数据插入数据库中，同时布隆过滤对应的位置也设置为1；
   >   3. 然后获取数据前，先从布隆过滤器中判断是否存在；
   >   
   >   存在hash碰撞，所以会误判。不存在的却被布隆过滤器判断为存在；可以使用多个hash值解决
@@ -2419,17 +2405,17 @@
   >
   >    - bgsave命令会派生出一个子进程来创建RDB文件。这期间父进程会处理命令请求。子进程创建完成之后，会通知父进程.。
   >
-  >      ```java
-  >    save 900 1
-  >    save 300 10
-  >    save 60 10000
-  >     格式：
-  >    redis-dbversion-selectDB-0-paris-selctDB-3-paris-EOF-check_sum
-  >      ```
-  >
   >    - dirty属性记录距离上一次成功执行save和bgsave命令之后，修改操作数；
-  >
+  >    
   >    - lastsave属性时一个时间戳记录距离上一次成功执行save和bgsave命令的时间；
+  >    
+  >      ```java
+  >      save 900 1
+  >      save 300 10
+  >  save 60 10000
+  >       格式：
+  >  redis-dbversion-selectDB-0-paris-selctDB-3-paris-EOF-check_sum
+  >      ```
   >
   > 2. AOF
   >
@@ -2697,7 +2683,7 @@
 
 - [redis的sentinel进行failover流程](https://www.cnblogs.com/ivictor/p/9755065.html)
 
-  > - 每隔1秒，每个Sentinel节点会向主节点、从节点、其余Sentinel节点发送一条ping命令做一次心跳检测，来确认这些节点当前是否可达。当这些节点超过down-after-milliseconds没有进行有效回复，Sentinel节点就会判定该节点为主观下线。
+  > - 每隔1秒，每个Sentinel节点会向主节点、从节点、其余Sentinel节点发送一条ping命令做一次心跳检测，来确认这些节点当前是否可达。当这些节点超过down-after-milliseconds（default  30s）没有进行有效回复，Sentinel节点就会判定该节点为主观下线。
   >
   > - 如果被判定为主观下线的节点是master主节点，该Sentinel节点会通过sentinel is master-down-by-addr命令向其他Sentinel节点询问对主节点的判断，当超过<quorum>个数，Sentinel节点会判定该节点为客观下线。如果从节点、Sentinel节点被判定为主观下线，并不会进行后续的故障切换操作。
   >
@@ -2753,7 +2739,7 @@
 
   
 
-- [redis 的线程模型](https://www.javazhiyin.com/22943.html)
+- [redis 的线程模型](https://www.javazhiyin.com/22943.html) ***
 
   > - redis内部使用文件事件处理器（file event handler），这个文件事件处理器是单线程的，所以叫做单线程模型。它是使用io多路复用机制同时监听多个socket，根据socket上的事件选择对应的事件处理器。
   > - 文件事件处理器包括：多个socket、io多路复用器、文件事件分配器、文件事件处理器。
