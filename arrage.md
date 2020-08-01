@@ -1,10 +1,97 @@
-1. 常用算法，刷算法，回顾，刷算法
-2. 项目经验整理，包括凤凰网的；
-3. vertx原理整理；
-4. 工作中解决的问题整理；
-5. 项目中的指标数据整理；
-6. 技术中的实践使用场景；
-7. 各个技术的整理
-8. 完善各个技术的常见面试题；
-9. Springcloud double
+1. 各种排序 
 
+   > 1. 冒泡排序（n2 稳定）、
+   > 2. 插入排序（n2  稳定）
+   > 3. 选择排序  (n2 不稳定)
+   > 4. 快速排序（n*logn 不稳定）、、
+   > 5. 归并排序（nlogn 稳定，非原地排序）
+
+2. **[191. 位1的个数](https://leetcode-cn.com/problems/number-of-1-bits/)** （已处理）
+
+3. [231. 2的幂](https://leetcode-cn.com/problems/power-of-two/)（已处理）
+
+4. [64. 最小路径和](https://leetcode-cn.com/problems/minimum-path-sum/)
+
+7. [300. 最长上升子序列](https://leetcode-cn.com/problems/longest-increasing-subsequence/) ***
+
+8. [198. 打家劫舍](https://leetcode-cn.com/problems/house-robber/)
+
+7. [70. 爬楼梯](https://leetcode-cn.com/problems/climbing-stairs/)  
+
+8. [120. 三角形最小路径和](https://leetcode-cn.com/problems/triangle/) （已处理）
+
+9. [14. 最长公共前缀](https://leetcode-cn.com/problems/longest-common-prefix/)
+
+10. [20 有效的括号](https://leetcode-cn.com/problems/valid-parentheses/)
+
+11. [22. 括号生成](https://leetcode-cn.com/problems/generate-parentheses/)
+
+12. [49. 字母异位词分组](https://leetcode-cn.com/problems/group-anagrams/)
+
+13. [50. Pow(x, n)](https://leetcode-cn.com/problems/powx-n/)
+
+14. [121. 买卖股票的最佳时机](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/)  [买卖股票升级版](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/solution/yi-ge-fang-fa-tuan-mie-6-dao-gu-piao-wen-ti-by-l-3/)
+
+15. [152. 乘积最大子数组](https://leetcode-cn.com/problems/maximum-product-subarray/)（已处理）
+
+16. [15. 三数之和](https://leetcode-cn.com/problems/3sum/)
+
+17. [3. 无重复字符的最长子串](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
+
+
+
+1. [46. 全排列](https://leetcode-cn.com/problems/permutations/) ？？？
+
+2. [72. 编辑距离](https://leetcode-cn.com/problems/edit-distance/) ???
+
+3. #### [279. 完全平方数](https://leetcode-cn.com/problems/perfect-squares/) ???
+
+   
+
+
+
+1.  [19. 删除链表的倒数第N个节点](https://leetcode-cn.com/problems/remove-nth-node-from-end-of-list/)
+
+2. [21. 合并两个有序链表](https://leetcode-cn.com/problems/merge-two-sorted-lists/)
+
+3.  [Leecode-206]( https://leetcode-cn.com/problems/reverse-linked-list/)
+
+4.  [141 环形链表](https://leetcode-cn.com/problems/linked-list-cycle/)
+
+5. #### [83. 删除排序链表中的重复元素](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list/)
+
+6. #### [24. 两两交换链表中的节点](https://leetcode-cn.com/problems/swap-nodes-in-pairs/)
+
+7. ####  [160 相交链表](https://leetcode-cn.com/problems/intersection-of-two-linked-lists/)
+
+8. #### [142 环形链表 II](https://leetcode-cn.com/problems/linked-list-cycle-ii/) 
+
+9. [7. 整数反转](https://leetcode-cn.com/problems/reverse-integer/)
+
+10. #### [9. 回文数](https://leetcode-cn.com/problems/palindrome-number/)
+
+11. #### [48. 旋转图像](https://leetcode-cn.com/problems/rotate-image/)
+
+12. [88. 合并两个有序数组](https://leetcode-cn.com/problems/merge-sorted-array/)
+
+13. [704. 二分查找](https://leetcode-cn.com/problems/binary-search/)
+
+14. [225. 用队列实现栈](https://leetcode-cn.com/problems/implement-stack-using-queues/)
+
+15. **[232 用栈实现队列](https://leetcode-cn.com/problems/implement-queue-using-stacks/)** 
+
+16. #### [155. 最小栈](https://leetcode-cn.com/problems/min-stack/)
+
+17. [199. 二叉树的右视图](https://leetcode-cn.com/problems/binary-tree-right-side-view/)
+
+18. [101. 对称二叉树](https://leetcode-cn.com/problems/symmetric-tree/)
+
+19. #### [226. 翻转二叉树](https://leetcode-cn.com/problems/invert-binary-tree/)
+
+20. #### [102. 二叉树的层序遍历](https://leetcode-cn.com/problems/binary-tree-level-order-traversal/)
+
+21. #### [144. 二叉树的前序遍历](https://leetcode-cn.com/problems/binary-tree-preorder-traversal/)
+
+22. #### [94. 二叉树的中序遍历](https://leetcode-cn.com/problems/binary-tree-inorder-traversal/)
+
+23. #### [146. LRU缓存机制](https://leetcode-cn.com/problems/lru-cache/)
