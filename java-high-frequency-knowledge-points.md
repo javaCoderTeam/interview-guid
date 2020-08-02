@@ -950,7 +950,7 @@ java基础
    >
    > ⑥.插入成功后，判断实际存在的键值对数量size是否超多了最大容量threshold，如果超过，进行扩容。
 
-8. [hashMap1.8比1.7做了什么优化](https://blog.csdn.net/liSir159633/article/details/105003718)
+8. [hashMap1.8比1.7做了什么优化](https://blog.csdn.net/liSir159633/article/details/105003718) ***
 
    > 1. 在java 1.8中，如果链表的长度超过了8并且它的hash桶大于等于64的时候，那么链表将转换为红黑树。
    >    - 把时间复杂度从O（n）变成O（logN）提高了效率
@@ -1194,7 +1194,7 @@ java基础
 
 # JVM
 
-1. JVM运行内存的分类  [深入java虚拟机总结](https://www.cnblogs.com/wangzhongqiu/p/8908266.html)
+1. JVM运行内存的分类  [深入java虚拟机总结](https://www.cnblogs.com/wangzhongqiu/p/8908266.html) ***
 
    > - 程序计数器：存放的是虚拟机正在执行的字节码指令，可以看成是当前线程所执行的字节码行号，线程私有；
    >
@@ -1214,7 +1214,7 @@ java基础
    >
    > - 方法区：线程共享，虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。也就是老年代；回收目标主要是常量池的回收和类型的卸载。jdk1.8使用metaSpace来代替永久代方法区；
    >
-   >   `JDK 1.8 同 JDK 1.7 比，最大的差别就是：元数据区取代了永久代。元空间的本质和永久代类似，都是对 JVM 规范中方法区的实现。不过元空间与永久代之间最大的区别在于：元数据空间并不在虚拟机中，而是使用本地内存。`
+   >   `JDK 1.8 同 JDK 1.7 比，最大的差别就是：元数据区取代了永久代。元空间的本质和永久代类似，都是对 JVM 规范中方法区的实现。不过元空间与永久代之间最大的区别在于：元数据空间并不在虚拟机中，而是使用本地内存。[metaspace](https://blog.csdn.net/u012834750/article/details/70160594)
    >
    > - 运行时常量池：是方法区的一部分，运行时的常量池，比如integer的-128-127；1.8中转移到堆中；
    >
@@ -1222,13 +1222,13 @@ java基础
 
 2. HotSpot虚拟机
 
-   - 对象的创建
+   - 对象的创建 （对象的初始化、分配内存、把对象指针指向内存区域）  ***
 
    > - 为对象分配内存，如果是规整的采用指针碰撞的方式；不规整的采用空闲列表，内存是否规则看是否代用压缩的功能；
    >
    > - serial、parNew带有压缩功能使用的是指针碰撞，cms使用的是空闲列表；
 
-   - 对象涉及到分配内存和指针指向两个操作，不是原子性的，不是线程安全的。
+   - 对象涉及到分配内存和指针指向两个操作，不是原子性的，不是线程安全的。***
 
    > 1. 使用cas加上失败重试来保证原子性；
    > 2. 使用TLAB（Thread Local Allocation Buffer）策略，预先为每个线程分配一块内存，那个线程需要就各自分配，只有用完的时候才需要锁定同步；是否使用TLAB 需要配置-XX:+/- UseTLAB；
@@ -1260,22 +1260,22 @@ java基础
    >
    > - 本地方法栈中JNI（即一般说的Native方法）引用的对象；
    >
-   > - 方法区中静态变量引用的对象，常量引用的对象
+   > - 方法区中`静态变量`引用的对象，`常量引用`的对象
 
-   6. 对象被回收的过程
+   6. 对象被回收的过程 ***
 
    > -  使用GCRoot标记可回收后判断是否需要执行finalize()方法（重写了或者手动调用了finalize()方法就需要执行）；
    >
-   > - 如果需要执行，则放入F-queue队列中，虚拟机会在稍后执行，如果在执行finalize方法时与GCRoot产生引用链，则可以逃脱被回收的命运；
+   > - 如果需要执行，则放入F-queue队列中，虚拟机对应的线程会在稍后执行，如果在执行finalize方法时与GCRoot产生引用链，则可以逃脱被回收的命运；
 
-   7. GC垃圾回收算法
+   7. GC垃圾回收算法 
 
    > - 标记-清除算法：标记出没有用的对象，然后进行清除；缺点标记和清除的算法都不高，且会产生内存碎片；
    > - 复制算法：容量等大分为两份，一份满了，将存活的复制到另一份中；缺点浪费空间；
    > - 标记-整理：标记出存活的对象，让存活的对象移动到一端，直接清除端以外的对象；优点是解决了标记清除导致的内存碎片问题；
    > - 分代回收：根据对象的存活时间分为年轻代和老年代，年轻代使用复制算法，老年代使用标记整理算法，cms采用标记清除算法；
 
-   8. 内存分配和回收策略
+   8. 内存分配和回收策略 ***
 
    > - 结构： 年轻代（1/3）生命周期短，8:1:1 eden:survival ;老年代 (2/3):生命周期长
    > - 小对象先在年轻代区分配；
@@ -1324,14 +1324,14 @@ java基础
    >   耗时最长的并发标记和并发清除不会停顿，用户线程和处理线程一起工作；
    > - 缺点：
    >   1. 垃圾回收时占用线程，导致系统变慢，吞吐量降低；
->   2. 使用标记-清除算法，容易产生内存碎片；需要开启碎片整理功能，多少次fullgc后开启一次带压缩的fullGC,使用-XX:CMSFullGCsBeforeCompaction
+   >   2. 使用标记-清除算法，容易产生内存碎片；需要开启碎片整理功能，多少次fullgc后开启一次带压缩的fullGC,使用-XX:CMSFullGCsBeforeCompaction
    >   3. 并发操作期间需要预留给用户的线程的内存，否则会出现 Concurrent Mode Failure 错误，需要使用 serial old，进行垃圾回收，导致停顿时间边长；
-
+   >
    > G1收集器
    >
    > - `特点`：包括新生代和老年代的垃圾回收；并行并发，分代收集，标记-整理，可预测的停顿；
    >
-   >   1、并行与并发：G1能够更充分利用多CPU、多核环境运行
+   >   1、并行与并发：G1能够更充分利用多CPU、多核环境运行；
    >
    >   2、分代收集：G1虽然也用了分代概念，但相比其他收集器需要配合不同收集协同工作，但G1收集器能够独立管理整个堆
    >
@@ -1339,14 +1339,12 @@ java基础
    >
    >   4、可预测的停顿：降低停顿时间是G1和CMS共同目标，但是G1追求低停顿外，还能建立可预测的停顿时间模型，能让使用者明确指定一个长度为M毫秒的时间片段内，消耗在垃圾收集器上的时间不得超过N毫秒。
    >
-   > - `流程`：
-   >   初始标记：标记GC Roots能够直接关联到的对象，这阶段需要停顿线程，时间很短
-   >   并发标记：进行可达性分析，这阶段耗时较长，可与用户程序并发执行
-   >   最终标记：修正发生变化的记录，需要停顿线程，但是可并行执行
-   >   筛选回收：对各个Region的回收价值和成本进行排序，根据用户所期望的停顿时间来执行回收计划；
->
-   > 
-
+   >   `流程`：
+   >
+   >   - 初始标记：标记GC Roots能够直接关联到的对象，这阶段需要停顿线程，时间很短
+   >   - 并发标记：进行可达性分析，这阶段耗时较长，可与用户程序并发执行
+   >   - 最终标记：修正发生变化的记录，需要停顿线程，但是可并行执行
+   >   - 筛选回收：对各个Region的回收价值和成本进行排序，根据用户所期望的停顿时间来执行回收计划；
    14. 虚拟机性能监控工具 ***
 
        >1. jps，直接带有权限的hotspot虚拟机进程；
@@ -1401,7 +1399,7 @@ java基础
    > 类加载被分为加载、连接、初始化过程；连接又细分为验证、准备和解析；
    >
    > 1. 装载：jvm将字节码文件以二进制的方式读入到内存中，解释器转变为机器码，转化为运行时数据结构；
-   > 2. 连接：主要做加载完的准备工作，`验证被加载的文件是否符合java以及jvm规范`；`为类变量分配内存空间和设置初始值的阶段； `虚拟机将符号引用替换为直接引用的过程`；
+   > 2. 连接：主要做加载完的准备工作，`验证被加载的文件是否符合java以及jvm规范`；`为类变量分配内存空间和设置初始值的阶段；虚拟机将符号引用替换为直接引用的过程`；
    > 3. 初始化：根据程序代码去初始化类变量和其他资源；
 
 
@@ -1416,17 +1414,17 @@ java基础
    > - 双亲委派模型。分为两种类加载器： 1 是启动类加载器 ，是虚拟机自身的一部分；2 是所有的其他类加载器，这些类加载器都由java语言实现。独立于虚拟机外部，全部继承自java.lang.ClassLoader抽象类。类加载器具体层次关系：启动类加载器->扩展类加载器->系统类加载器->自定义类加载器。每一个类的加载，会优先由父加载器来加载。这种方式就称为双亲委派，双亲委派保证了java基本类的不会被破坏和替代，避免重复加载java类；
    > - 双亲委派模型的缺点，比如我们需要一个类的不同版本，则双亲委派模型就不合适了。
 
-   19.  [什么地方违反了双亲委派模型](https://cloud.tencent.com/developer/article/1490214) ***
+   19. [什么地方违反了双亲委派模型](https://cloud.tencent.com/developer/article/1490214) ***
 
        >  jdk中的基础类作为用户典型的api被调用，但是也存在被api调用用户的代码的情况，典型的如SPI代码。
        >
-       > 所以jdk开发人员就引入了线程上下文类加载器（Thread Context ClassLoader），这类类加载器可以通过java.lang.Thread 类的setContextClassLoader方法进行设置。
+       >  - [spi是如何破坏双亲委派模型的？](https://www.zhihu.com/question/49667892)
        >
-       > - [spi是如何破坏双亲委派模型的？](https://www.zhihu.com/question/49667892)
+       >  Java 在核心类库中定义了许多接口，并且还给出了针对这些接口的调用逻辑，然而并未给出实现。开发者要做的就是定制一个实现类，在 META-INF/services 中注册实现类信息，以供核心类库使用。
        >
-       > SPI 的调用方和接口定义方很可能都在 Java 的核心类库之中，而实现类交由开发者实现，然而实现类并不会被启动类加载器所加载，基于双亲委派的可见性原则，SPI 调用方无法拿到实现类。
+       >  java.sql.Driver 是最为典型的 SPI 接口，java.sql.DriverManager 通过扫包的方式拿到指定的实现类，完成 DriverManager的初始化。
        >
-       > SPI Serviceloader 通过线程上下文获取能够加载实现类的classloader，一般情况下是 application classloader，绕过了这层限制，逻辑上打破了双亲委派原则。
+       >  SPI Serviceloader 通过线程上下文获取能够加载实现类的classloader，一般情况下是 application classloader，绕过了这层限制，逻辑上打破了双亲委派原则。
 
    20. java虚拟机调优记录
 
@@ -1529,7 +1527,7 @@ java基础
 
 - [动态代理模式](https://www.cnblogs.com/gonjan-blog/p/6685611.html)
 
-- [23种设计模式](https://blog.csdn.net/jason0539/article/details/44956775)
+- [23种设计模式](https://blog.csdn.net/jason0539/article/details/44956775)  ***
 
 > - 建造者模式   创建bean的时候使用建造者模式，不用使用多个构造函数，不用使用set方法
 > - 模板方法模式（消费答题记录的场景，一个是做学员的统计相关的，一个是算试题的正答率。它的公共模式 获取消费者客户端、设置消费者组，解析订阅的topic列表，拉取消息、过滤消息、进行计算和业务处理、commit。 不同的是设置消费者组、过滤，具体的入库逻辑不同等抽象方法；
@@ -1753,7 +1751,7 @@ java基础
     > 3. 如果bean实现了BeanNameAware接口,spring将bean的id传给setBeanName()方法
     > 4. 如果bean实现了BeanFactoryAware接口,spring将调用setBeanFactory方法,将BeanFactory实例传进来
     > 5. 如果bean实现了ApplicationContextAware()接口,spring将调用setApplicationContext()方法将应用上下文的引用传入
-    > 6. 如果bean实现了BeanPostProcessor接口,spring将调用它们的postProcessBeforeInitialization接口方法
+    > 6. 如果bean实现了[BeanPostProcessor](https://www.jianshu.com/p/dcc990d47df1)接口,spring将调用它们的postProcessBeforeInitialization接口方法  
     > 7. 如果bean实现了InitializingBean接口,spring将调用它们的afterPropertiesSet接口方法,类似的如果bean使用了init-method属性声明了初始化方法,改方法也会被调用
     > 8. 如果bean实现了BeanPostProcessor接口,spring将调用它们的postProcessAfterInitialization接口方法
     > 9. 此时bean已经准备就绪,可以被应用程序使用了,他们将一直驻留在应用上下文中,直到该应用上下文被销毁
@@ -1799,10 +1797,14 @@ java基础
     >
     > jdk创建的快，cglib运行的快；
 
-14. [spring是如何解决循环依赖2 ](https://blog.csdn.net/u010853261/article/details/77940767) ***
+14. [为什么jdk动态代理一定需要实现接口](https://segmentfault.com/a/1190000021821314)
+
+    >  jdk动态代理是为接口生成代理对象，该代理对象（实现类）继承了java标准类库proxy.java并实现了目标对象。由于java遵从单继承多实现的原则，所以jdk无法利用继承为目标对象生成代理对象。
+
+15. [spring是如何解决循环依赖2 ](https://blog.csdn.net/u010853261/article/details/77940767) ***
 
     [spring是如何解决循环依赖3](https://juejin.im/post/5c98a7b4f265da60ee12e9b2)     ***
-    
+
     > 需要明确的是spring对循环依赖的处理有三种情况： ①构造器的循环依赖：这种依赖spring是处理不了的，直 接抛出BeanCurrentlylnCreationException异常。 ②单例模式下的setter循环依赖：通过“三级缓存”处理循环依赖。 ③非单例循环依赖：无法处理。
     >
     > `对象的初始化方法分为三步`
@@ -1831,8 +1833,8 @@ java基础
     > ```
     >
     > 通过Spring容器提前暴露刚完成实例化但未完成其他步骤（如setter注入）的bean来完成的。`通过提前暴露一个单例工厂方法，从而使其他bean能够引用到该bean`
-    
-15. spring用到了哪些设计模式
+
+16. spring用到了哪些设计模式
 
     > -  [BeanFactory](https://github.com/spring-projects/spring-framework/blob/master/spring-beans/src/main/java/org/springframework/beans/factory/BeanFactory.java)和[ApplicationContext](https://github.com/spring-projects/spring-framework/blob/master/spring-context/src/main/java/org/springframework/context/ApplicationContext.java)应用了工厂模式。
     >- 在 Bean 的创建中，Spring 也为不同 scope 定义的对象，提供了单例和原型等模式实现。
@@ -1840,17 +1842,17 @@ java基础
     > - 各种事件监听器，是观察者模式的典型应用。
     > - 类似 JdbcTemplate 等则是应用了模板模式。
 
-16. @Autowired和@Resource的区别
+17. @Autowired和@Resource的区别
 
     > - 前者是spring的注解，默认是按照bean的Type进行注入的，可以配置require =false表示可为空，可以配合@qualifier按照beanName注入；
     > - 后者是java提供的annotation注解，但是spring支持，他是默认按照名字注入。可以指定name和type字段来注入；
-    
-17. spring事务相关  ？？？？
+
+18. spring事务相关  ？？？？
 
     > - 
     > -  事务简介
-    
-18. spring是如何实现事务
+
+19. spring是如何实现事务 ***
 
     >  [源码层面](https://my.oschina.net/zhangxufeng/blog/1973493) ,
     >
@@ -1862,11 +1864,11 @@ java基础
     >  >
     >  >   >  `PlatformTransactionManager`定义了事务的操作行为，获取事务，提交回滚；
     >  >   >
-    >  >   > `TransactionDefinition`定了了事务的属性，事务的传播行为（默认是PROPAGATION_REQUIRED，比如在有事务的上下文中运行，如果有事务则加入事务，如果没有则创建一个事务），事务的隔离级别（默认是可重复读，只有在新事物中才有效，`PROPAGATION_REQUIRED`和`PROPAGATION_REQUIRES_NEW传播行为中有效）；exceptionFor（特定的异常回滚）；事务超时时间等；
+    >  >   > `TransactionDefinition`定了了事务的属性，事务的传播行为（默认是PROPAGATION_REQUIRED，比如在有事务的上下文中运行，如果有事务则加入事务，如果没有则创建一个事务），事务的隔离级别（默认是可重复读，只有在新事物中才有效，`PROPAGATION_REQUIRED`和`PROPAGATION_REQUIRES_NEW`传播行为中有效）；exceptionFor（特定的异常回滚）；事务超时时间等；
     >  >
     >  > - 事务的切面
     >  >
-    >  >   >  代理对象生成的核心类`AbstractAutoProxyCreator，实现了`BeanPostProcessor`接口，会在**Bean初始化完成之后**，通过`postProcessAfterInitialization`方法生成代理对象。
+    >  >   >  代理对象生成的核心类`AbstractAutoProxyCreator，实现了`BeanPostProcessor接口，会在Bean初始化完成之后通过postProcessAfterInitialization方法生成代理对象。
     >  >   
     >  > - TransactionInterceptor 中调用invoke方法，然后通过他的支持类`TransactionAspectSupport`的`invokeWithinTransaction`方法进行事务处理，
 
@@ -1896,13 +1898,12 @@ java基础
    > 1. innodb是支持事务、支持外键等高级功能，带来性能损耗；mylsam是不支持的，所以性能高点；
    > 2. innodb支持行级锁和表锁；mylsam只支持表锁；
    > 4. innodb的主键索引和数据都放到一个数据文件中，是聚集索引；mylsam是索引和数据文件是分开存放的，是非聚集索引；
-   > 4. 查询行数的区别。因为innodb采用了MVCC技术，对于相同的行，可能同时存在多个版本，innodb必须根据查询的时间来过滤掉一些行，才能得出结果，必然要执行全表扫描，而全表扫描是非常耗时的。对于myisam的表，任何行都只有一个版本，所以处理起来很快。
    > 5. 实现结构上的区别：
-   >
-   >   - 第一个重大区别是InnoDB的数据文件本身就是索引文件。MyISAM索引文件和数据文件是分离的，索引文件仅保存数据记录的地址。而在InnoDB中，表数据文件本身就是按B+Tree组织的一个索引结构，这棵树的叶节点data域保存了完整的数据记录。这个索引的key是数据表的主键，因此InnoDB表数据文件本身就是主索引。
+   > 
+   >  - 第一个重大区别是InnoDB的数据文件本身就是索引文件。MyISAM索引文件和数据文件是分离的，索引文件仅保存数据记录的地址。而在InnoDB中，表数据文件本身就是按B+Tree组织的一个索引结构，这棵树的叶节点data域保存了完整的数据记录。这个索引的key是数据表的主键，因此InnoDB表数据文件本身就是主索引。
    >   - 第二个InnoDB的辅助索引data域存储相应记录主键的值而不是地址。换句话说，InnoDB的所有辅助索引都引用主键作为data域，mylsam使用data域中存放的事数据行记录的地址；
-   >
-
+   > 
+   
 2. [一颗b+树可以存储多少数据  ***](mysql b+树能存多少条数据)
 
    >  这里我们`先假设B+树高为2`，即存在一个根节点和若干个叶子节点，那么这棵B+树的存放总记录数为：根节点指针数*单个叶子节点记录行数。
@@ -2038,9 +2039,6 @@ java基础
    >
    > - ```
    >   第一范式:数据库表的每一个字段都是不可分割的。
-   >   ```
-   >
-   >   ```
    >   第二范式:数据库表中的非主属性只依赖于主键。
    >   第三范式:不存在非主属性对关键字的传递函数依赖关系。
    >   ```
@@ -2140,7 +2138,7 @@ java基础
 
     > 使用行锁加间隙锁来解决的；
     >
-    > - Repeatable Read隔离级别下，id列上有一个非唯一索引，对应SQL：delete from t1 where id = 10; 首先，通过id索引定位到第一条满足查询条件的记录，加记录上的X锁，加GAP上的GAP锁，然后加主键聚簇索引上的记录X锁，然后返回；然后读取下一条，重复进行。直至进行到第一条不满足条件的记录[11,f]，此时，不需要加记录X锁，但是仍旧需要加GAP锁，最后返回结束。
+    > - Repeatable Read隔离级别下，age列上有一个非唯一索引，对应SQL：delete from t1 where age = 10; 首先，通过id索引定位到第一条满足查询条件的记录，加记录上的X锁在GAP上的GAP锁，然后加主键聚簇索引上的记录X锁，然后返回；然后读取下一条，重复进行。直至进行到第一条不满足条件的记录[11,f]，此时，不需要加记录X锁，但是仍旧需要加GAP锁，最后返回结束。
     > - 什么时候会取得gap lock或nextkey lock  这和隔离级别有关,只在REPEATABLE READ或以上的隔离级别下的特定操作才会取得gap lock或nextkey lock。
     > - mysql 的重复读解决了幻读的现象，但是需要 加上 select for update/lock in share mode 变成当读避免幻读，普通读select存在幻读
 
@@ -2162,7 +2160,7 @@ java基础
 
     [mvcc机制及原理](https://chenjiayang.me/2019/06/22/mysql-innodb-mvcc/#%E4%BB%80%E4%B9%88%E6%98%AF-mvcc)  ***
 
-    > MVCC模型在MySQL中的具体实现则是由 **`3个隐式字段`**，**`undo日志`** ，**`Read View`** 等去完成的。
+    > MVCC实现了mysql的事务的隔离性，该模型在MySQL中的具体实现则是由 **`3个隐式字段`**，**`undo日志`** ，**`Read View`** 等去完成的。
     >
     > 1. DATA_TRX_ID（事务id）：标识最近修改本行记录的事务标识符；
     >
@@ -2219,7 +2217,13 @@ java基础
 
     >  使用record lock加gap锁；
 
-23. [数据库为什么要用B+树结构--MySQL索引结构的实现](https://blog.csdn.net/bigtree_3721/article/details/73650601)、
+23. [mysql是如何实现可重复读的 ***](https://juejin.im/post/6844904180440629262)
+
+    > - InnoDB 的行数据有多个版本，每个版本都有 row trx_id。
+    > - 事务根据 undo log 和 trx_id 构建出满足当前隔离级别的一致性视图。
+    > - 可重复读的核心是一致性读，而事务更新数据的时候，只能使用当前读，如果当前记录的行锁被其他事务占用，就需要进入锁等待。
+
+24. [数据库为什么要用B+树结构--MySQL索引结构的实现](https://blog.csdn.net/bigtree_3721/article/details/73650601)、
 
     [mysql的索引数的原理解析](https://blog.csdn.net/u013967628/article/details/84305511) ***
 
@@ -2240,11 +2244,11 @@ java基础
     > - 根据局部性原理以及磁盘预读，预读的长度一般为页的整数倍；
     > - 数据库系统巧妙的利用磁盘预读原理，将一个节点的大小设置为一个页，这样每个节点只需要一次IO就可以完全载入，像红黑树这种结构，h明显要深很多。由于逻辑上很近的节点物理上就可能很远，无法利用局部性原理；
 
-24. [B+树的缺点](https://blog.csdn.net/dbanote/article/details/8897599)
+25. [B+树的缺点](https://blog.csdn.net/dbanote/article/details/8897599)
 
     > B+树最大的性能问题是会产生大量的随机IO，随着新数据的插入，叶子节点会慢慢分裂，逻辑上连续的叶子节点在物理上往往不连续，甚至分离的很远，但做范围查询时，会产生大量读随机IO。
 
-25. [分布式id生成器](https://tech.meituan.com/2017/04/21/mt-leaf.html)
+26. [分布式id生成器](https://tech.meituan.com/2017/04/21/mt-leaf.html)
 
     [分布式id生成器简介2](https://mp.weixin.qq.com/s/7RQhCazoLJ-qO7CglZ6b2Q) ***
 
@@ -2255,7 +2259,7 @@ java基础
     > 5. redis生产方案：使用incr原子操作。年月日时分秒+自增id；10万个请求获取id，并发执行完9s左右；`性能一般，占用带宽`
     >
 
-26. mysql的各种日志的（这三种日志是顺序IO）***
+27. mysql的各种日志的（这三种日志是顺序IO）***
 
     > - Redo log（重做日志）：事务开始之后就产生redo log，redo log的落盘并不是随着事务的提交才写入的，而是在事务的执行过程中，便开始写入redo log文件中。确保事务的持久性。`防止在发生故障的时间点，尚有脏页未写入磁盘，在重启mysql服务的时候，根据redo log进行重做`，从而达到事务的持久性这一特性。
     > - Undo log(回滚日志)：保存了事务发生之前的数据的一个版本，可以用于回滚，同时可以提供多版本并发控制下的读（MVCC），也即非锁定读。
@@ -2263,13 +2267,13 @@ java基础
     >   1. 用于复制，在主从复制中，从库利用主库上的binlog进行重播，实现主从同步。
     >   2. 用于数据库的基于时间点的还原
 
-27. mysql主从同步流程 ***
+28. mysql主从同步流程 ***
 
     > - master将操作语句记录到binlog日志中，然后授予slave远程连接的权限（master一定要开启binlog二进制日志功能；通常为了数据安全考虑，slave也开启binlog功能）。
     > - slave开启两个线程：IO线程和SQL线程。其中：IO线程负责读取master的binlog内容到中继日志relay log里；SQL线程负责从relay log日志里读出binlog内容，并更新到slave的数据库里。
     > - 日志格式：statement level记录操作语句, row level记录操作涉及的所有行数据, mixed level;
 
-28. [深度分页的优化](https://blog.csdn.net/ydyang1126/article/details/72885246)
+29. [深度分页的优化](https://blog.csdn.net/ydyang1126/article/details/72885246)
 
     >  核心思想是缩小limit m,n的范围。
     >
@@ -2279,7 +2283,7 @@ java基础
     >
     >    原理还是一样，**记录住当前页id的最大值和最小值，计算跳转页面和当前页相对偏移**，由于页面相近，这个偏移量不会很大，这样的话m值相对较小，大大减少扫描的行数。
 
-29. [mysql，未分库之后进行分库，具体的方案](https://github.com/doocs/advanced-java/blob/master/docs/high-concurrency/database-shard-method.md)
+30. [mysql，未分库之后进行分库，具体的方案](https://github.com/doocs/advanced-java/blob/master/docs/high-concurrency/database-shard-method.md)
 
     > 1. 场景，数据库的数据量单表达到2000万，db的磁盘不够用，又无法升级磁盘，所以需要使用新机器进行分400张表扩容分表；
     > 2. 首先，将库里的其它表的数据从旧db导入到新db，自己使用定时任务将数据重新rehash到新的400张表中。需要对比某个时间点，新旧两个库里的数据量是否一致。
@@ -2346,7 +2350,7 @@ java基础
    >
    >   网络层：路由器
 
-7. [三次握手四次挥手](https://blog.csdn.net/qzcsu/article/details/72861891)
+7. [三次握手四次挥手](https://blog.csdn.net/qzcsu/article/details/72861891)  ***
 
    ![img](https://img-blog.csdn.net/20180901094250499?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NpZmFuY2hhbw==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
 
@@ -2593,7 +2597,7 @@ java基础
   >      ```java
   >      save 900 1
   >      save 300 10
-  >  save 60 10000
+  > save 60 10000
   >       格式：
   >  redis-dbversion-selectDB-0-paris-selctDB-3-paris-EOF-check_sum
   >      ```
@@ -2668,8 +2672,8 @@ java基础
 
   > 当满足以下条件时使用ziplist，否则使用skipList
   >
+  > - 元素的长度小于64字节；
   > - 有序集合的数量不超过128个；
-  > - 有序集合保存的元素的长度小于64字节；
   >
   > 1. ziplist的结构就是压缩的结构，包括头部节点和元素部分；
   >
@@ -2724,13 +2728,13 @@ java基础
   >      } zskiplistNode;
   >      ```
   >
-  >      https://upload-images.jianshu.io/upload_images/6302559-7cdb7b7aeebec44b.png
+  >      https://zhuanlan.zhihu.com/p/26499803
   >    
   > 3. 查询逻辑
   >
   >    - zscore的查询，不是由skiplist来提供的，而是由那个dict来提供的。
   >
-  >    - 为了支持排名(rank)，Redis里对skiplist做了扩展，使得根据排名能够快速查到数据，或者根据分数查到数据之后，也同时很容易获得排名。而且，根据排名的查找，时间复杂度也为O(log n)。
+  >    - `根据排名的查找，时间复杂度也为O(log n)。` 为了支持排名(rank)，   Redis里对skiplist做了扩展，使得根据排名能够快速查到数据，或者根据分数查到数据之后，也同时很容易获得排名。而且，根据排名的查找，时间复杂度也为O(log n)。
   >
   >    - zrevrange的查询，是根据排名查数据，由扩展后的skiplist来提供。
   >
@@ -2741,12 +2745,12 @@ java基础
   >    - zscore只用查询一个dict，所以时间复杂度为O(1)
   >    - zrevrank, zrevrange, zrevrangebyscore由于要查询skiplist，所以zrevrank的时间复杂度为O(log n)，而zrevrange, zrevrangebyscore的时间复杂度为O(log(n)+M)，其中M是当前查询返回的元素个数。
 
-- [为什么会用跳表来实现zset而不用红黑树]([https://syt-honey.github.io/2019/03/23/17-%E8%B7%B3%E8%A1%A8%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88Redis%E4%B8%80%E5%AE%9A%E8%A6%81%E7%94%A8%E8%B7%B3%E8%A1%A8%E6%9D%A5%E5%AE%9E%E7%8E%B0%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88%EF%BC%9F/](https://syt-honey.github.io/2019/03/23/17-跳表：为什么Redis一定要用跳表来实现有序集合？/))
+- [为什么会用跳表来实现zset而不用红黑树]([https://syt-honey.github.io/2019/03/23/17-%E8%B7%B3%E8%A1%A8%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88Redis%E4%B8%80%E5%AE%9A%E8%A6%81%E7%94%A8%E8%B7%B3%E8%A1%A8%E6%9D%A5%E5%AE%9E%E7%8E%B0%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88%EF%BC%9F/](https://syt-honey.github.io/2019/03/23/17-跳表：为什么Redis一定要用跳表来实现有序集合))
 
-  > - 其中，插入、删除、查找以及迭代输出有序序列，红黑树也可以完成，时间复杂度和跳表一样。但是按照区间来查找数据这个操作，红黑树的效率没有跳表高。
+  > - 其中，插入、删除、查找以及迭代输出有序序列，红黑树也可以完成，时间复杂度和跳表一样。`但是按照区间来查找数据这个操作，红黑树的效率没有跳表高`。
   >
-  > - 对于按照区间查找数据这个操作，跳表可以做到O(logn)的时间复杂度定位区间的起点，然后在原始链表中顺序往后遍历就可以了。
-  > - redis之所以用跳表来实现有序集合还有其它的原因。比如，相比于红黑树，跳表的代码看起来更易于理解、可读性更好也不容易出错。而且跳表也更加的灵活，他可以通过改变索引构建策略，有效平衡执行效率和内存消耗。
+  > - 对于按照区间查找数据这个操作，`跳表可以做到O(logn)的时间复杂度定位区间的起点，然后在原始链表中顺序往后遍历就可以了`。
+  > - redis之所以用跳表来实现有序集合还有其它的原因。比如，`相比于红黑树，跳表的代码看起来更易于理解、可读性更好也不容易出错`。而且跳表也更加的灵活，他可以通过改变索引构建策略，有效平衡执行效率和内存消耗。
   > - 不过，跳表也不能完全代替红黑树。红黑树比跳表出现的更早一些，很多编程语言中的Map类型都是基于红黑树实现的，当我们做业务开发的时候直接拿来用就好了，但是对于跳表我们就需要手动实现了。
 
 - [redis分布式锁](https://blog.csdn.net/yb223731/article/details/90349502)
@@ -2812,7 +2816,7 @@ java基础
   >
   > setbit bicount  getbit 实现布隆顾虑器；
 
-- [如何保障mysql和redis之间的数据一致](https://zhuanlan.zhihu.com/p/106101091?utm_source=wechat_session)
+- [如何保障mysql和redis之间的数据一致](https://zhuanlan.zhihu.com/p/106101091?utm_source=wechat_session)  ***
 
   > - 首先说明，线上使用的是设置的key有超时时间，极端情况是缓存有效时间内是不一致；
   > - 其次，我们采用先更新库，然后删除缓存；
@@ -2943,7 +2947,7 @@ java基础
 
 - redis的cluster模式 ***
 
-  >  Redis cluster，6 台机器，3 台机器部署了 Redis 主实例，另外 3 台机器部署了 Redis 的从实例，每个主实例挂了一个从实例，3 个节点对外提供读写服务，每个节点的读写高峰qps可能可以达到每秒 3000，3 台机器最多是 10000 读写请求/s。
+  >  Redis cluster，6 台机器，3 台机器部署了 Redis 主实例，另外 3 台机器部署了 Redis 的从实例，每个主实例挂了一个从实例，3 个节点对外提供读写服务，每个节点的读写高峰qps可能可以达到每秒 1000，3 台机器最多是 10000 读写请求/s。
   >
   > 机器是什么配置？32G 内存+ 8 核 CPU + 1T 磁盘，但是分配给 Redis 进程的是20g内存，一般线上生产环境，Redis 的内存尽量不要超过 20g。
   >
@@ -2967,9 +2971,11 @@ java基础
   >
   > 
 
-- 本地缓存和分布式缓存的优缺点
+- 本地缓存和分布式缓存的优缺点 ***
 
-  >  本地缓存：指的是在应用中的缓存组件，其最大的优点是应用和cache是在同一个进程内部，`请求缓存非常快速，没有过多的网络开销等`，在单应用不需要集群支持或者集群情况下各节点无需互相通知的场景下使用本地缓存较合适；同时，它的缺点也是应为`缓存跟应用程序耦合，多个应用程序无法直接的共享缓存`，各应用或集群的各节点都需要维护自己的单独缓存，`对内存是一种浪费`。
+  >  本地缓存：指的是在应用中的缓存组件，其最大的优点是应用和cache是在同一个进程内部，`请求缓存非常快速，没有过多的网络开销等`，在单应用不需要集群支持或者集群情况下各节点无需互相通知的场景下使用本地缓存较合适；
+  >
+  > 同时，它的缺点也是应为`缓存跟应用程序耦合，多个应用程序无法直接的共享缓存`，各应用或集群的各节点都需要维护自己的单独缓存，`对内存是一种浪费`。
   >
   > 
   >
@@ -3101,7 +3107,7 @@ java基础
   >
   > 
   >
-  > [自己实现 本地缓存策略](https://juejin.im/post/6844903939582722056)
+  > [自己实现 本地缓存策略](https://juejin.im/post/6844903939582722056)  ***
   >
   > 使用ConcurrentHashMap 来存储；
   >
@@ -3238,7 +3244,7 @@ java基础
 
  [经典试题](https://www.jianshu.com/p/eaafb1581e55)
 
-1. kafka的特性
+1. kafka的特性 ***
 
    >- kafka具有近乎实时的消息处理能力,面对海量消息的查询和存储也能高效的处理。Kafka每秒可以生产约25万消息（50 MB），每秒处理55万消息（110 MB）。
    >- kafka支持消息分区，每个分区中的消息可以保证顺序传输，而分区之间的消息可以并发操作，这样提高了kafka的并发能力；
@@ -3246,7 +3252,7 @@ java基础
    >- kafka支持为多个分区创建多个副本，其中只会有一个leader副本负责读写,其它副本负责与leader进行同步；
    >- 分布式的部署提高了数据的容灾能力;
 
-2. kafka吞吐量大的原因
+2. kafka吞吐量大的原因 ***
 
    > `顺序读写、零拷贝机制、分区、批量发送、数据压缩`
    >
@@ -3268,10 +3274,10 @@ java基础
 
    >因为Kafka的每个Topic、每个分区的每个segment都会对应一个物理文件。当Topic数量增加时，消息分散的落盘策略会导致 `磁盘IO竞争激烈` 成为瓶颈。而RocketMQ所有的消息是保存在同一个物理文件中的，Topic和分区数对RocketMQ也只是逻辑概念上的划分，所以Topic数的增加对RocketMQ的性能不会造成太大的影响。
 
-5. [kafka如何保证消息不丢失](https://blog.csdn.net/u010627840/article/details/76435385)
+5. [kafka如何保证消息不丢失  ***](https://blog.csdn.net/u010627840/article/details/76435385)
 
-   >1. 生产端设置ack=all，各个follower都同步完消息才算成功；在 producer 端设置 `retries=MAX`，失败后无限重试；
-   >2. 由于kafka采用至少一次的机制，保证消息不丢失，有可能重复；
+   >1. 在 producer 端设置 `retries=MAX`，失败后无限重试。由于kafka采用至少一次的机制，保证消息不丢失，有可能重复；
+   >2. broker端设置ack=all，各个follower都同步完消息才算成功；
    >3. consumer端采用手动提交commit日志的机制，只有自己手动处理成功，才提交commit日志；
    >  - 落库的数据使用唯一索引的方式保证数据不重复；
    >  - 业务处理逻辑中，将唯一键存储在redis中，消费之前判断是否存在，如果存在则不处理；如果不存在则在处理然后放入redis中；
@@ -3283,7 +3289,7 @@ java基础
    > - 支持生产者写数据的ack机制；
    > - 消费只会从leader读取，只有所有的follower都被ack了才会被读取到；
 
-8. 大量的消息积压了几个小时还没解决
+8. 大量的消息积压了几个小时还没解决 ***
 
    > - 先修复consumer的消费问题，确认其没有问题，把所有消费者停了；
    > - 新建一个topic，其partition是原先数量的10倍；
@@ -3307,10 +3313,10 @@ java基础
     >- 能不能`支持数据 0`丢失 啊？可以的，参考我们之前说的那个 kafka 数据零丢失方案。
     >- 支持消息的有序应，参考partition；
     
-12. [kafka和rocketMq的区别](https://www.cnblogs.com/eryun/p/12088253.html)
+12. [kafka和rocketMq的区别 ***](https://www.cnblogs.com/eryun/p/12088253.html)
 
     > - 吞吐量：kafka是百万级别的，rocketmq是十万级别的；
-    > - 服务治理：kafka使用的是zookeeper做服务发现和治理治理，broker和consumer都会向其注册自身的信息，当有broker或者consumer有宕机的时候会立刻感知，做响应的调整；rocketMq使用自定义的nameServer做服务发现和治理，实时性差点，比如broker宕机，producer和consumer都不能立刻感知，只有下次更新broker建群的时候才能做调整，但数据不会丢失；
+    > - 服务治理：kafka使用的是zookeeper做服务发现和治理治理，broker和consumer都会向其注册自身的信息，当有broker或者consumer有宕机的时候会立刻感知（利用zookeeper的监听机制），做相应的调整；rocketMq使用自定义的nameServer做服务发现和治理，实时性差点，比如broker宕机，producer和consumer都不能立刻感知，只有下次更新broker集群的时候才能做调整（轮训机制），但数据不会丢失；
     > - 消息查询和延迟队列：rocketmq支持根据offset查询，还支持自定义的key查询；支持延迟队列，rocketmq针对每个topic都有延迟队列，当消费失败后会将消息存入延迟队列中，每个消费者启动的时候回自动订阅延迟队列；
     > - 消息的落盘机制机制：kafka的每个toic下的每个分区的每个segment对应一个物理文件，分散落盘；roketmq的消息是一个物理文件，每个topic的每个分区只是逻辑上的分区，顺序落盘；
     > - 发送方式：kafka默认使用异步批量发送的形式，有一个memory buffer暂存消息，同时会将多个消息整合成一个数据包发送，这样能提高吞吐量，但对消息的实效有些影响；rocketmq可选择使用同步或者异步发送；
@@ -3347,7 +3353,7 @@ java基础
     
 14. [基于消息队列的分布式事务](https://zhuanlan.zhihu.com/p/101974130)
 
-    [常用的分布式事务解决方案](https://juejin.im/post/5aa3c7736fb9a028bb189bca#heading-15)
+    [常用的分布式事务解决方案](https://juejin.im/post/5aa3c7736fb9a028bb189bca#heading-15) ***
     
     > - 基于rocketmq（可靠消息服务）的分布式事务
     >
@@ -3419,7 +3425,6 @@ java基础
   > - 它是一个文件系统，具有监听通知机制；
   > - zookeeper提供了一个多层级的节点命名空间（znode），与文件系统不同的是这些节点可以存储关联的数据。为了保证高吞吐量和低延迟，在内存中维护这些节点的目录结构，但这使得zookeeper不能存放大量的数据，每个节点存储数据的上限为1M。
   > - client端会对某个znode节点建立一个watcher事件，当znode发生变化时，这些client会受到zk的通知，然后client会根据znode变化来做出业务上的改变等；
-  > - 
 
 - 四种类型的节点
 
@@ -3428,7 +3433,7 @@ java基础
   > 3. 临时目录节点；客户端与 zookeeper 断开连接后，该节点被删除
   > 4. 临时顺序编号目录节点
 
-- zookeeper功能
+- zookeeper功能 ***
 
   > - 命名服务（文件系统）：通过制定的名字来获取资源或者服务地址，通过zk创建一个全局唯一的路径；这个路径就是一个名字，指向集群中的集群，提供服务地址；
   >
@@ -3490,7 +3495,7 @@ java基础
   >
   >   - 通过实现Watcher接口，实现process(WatchedEvent event)方法来实施监控，使CountDownLatch来完成监控，在等待锁的时候使用CountDownLatch来计数，等到后进行countDown，停止等待，继续运行
 
-- [zookeeper作为注册中心的原理](https://www.jianshu.com/p/68a05b5af088)
+- [zookeeper作为注册中心的原理 ](https://www.jianshu.com/p/68a05b5af088) ***
 
   > - zookeeper就是个分布式文件系统，每当一个服务提供者部署后都要将自己的服务注册到zookeeper的某一路径上: /{service}/{version}/{ip:port}。创建一个Znode节点，存储用户的ip、端口调用方协议；
   >
@@ -3613,7 +3618,7 @@ java基础
 
 1. [限流算法](https://github.com/doocs/advanced-java/blob/master/docs/high-concurrency/huifer-how-to-limit-current.md)
 
-2. 微服务的优点和缺点
+2. 微服务的优点和缺点 ***
 
    > 单体应用的优点：
    >
@@ -3635,10 +3640,10 @@ java基础
    > 微服务的缺点
    >
    > - 服务调用链查找问题比较复杂，不确定是哪个服务的问题；
-   > - 服务间通信问题，比如需要考虑服务的通信的可靠性问题、超时、限流、降级、容错；
+   > - 服务间通信问题，比如需要考虑服务的通信的可靠性问题、[超时、限流、降级、容错](https://juejin.im/post/6844903838231576589)；
    > - 服务部署问题，需要知道各个服务的依赖关系、调用链；
 
-3. 服务拆分的原则
+3. 服务拆分的原则 ***
 
    > - 单一服务内部功能高内聚、低耦合。每个服务只完成自己的职责的任务，对于不是自己职责的功能要交给其他模块完成；比如判断用户是否为认证用户的逻辑要放在用户服务中而不能放到内容服务中；
    > - 服务拆分的粒度，先粗略拆分、再逐渐细化。比如黑名单相关的服务要先拆到用户服务中，后期可以再细拆；
@@ -3647,20 +3652,19 @@ java基础
    >   - 两个服务有依赖关系的时候，需要先拆分被依赖的服务；
    > - 服务接口的定义要具备可扩展性；比如一个微服务的接口有三个参数，一次需求开发中，组内的同学调整为4个参数，调用方没有修改，所以会报错
 
-4. 微服务化带来的问题和解决思路
+4. 微服务化带来的问题和解决思路 ***
 
    > - 引入注册中心，管理接口挂进程调用的服务地址及端口的管理；
    > - 多个服务之间的依赖，需要服务治理体系。需要熔断、限流、降级、超时机制；
    > - 快读定位调用链路的问题，需要引入分布式追踪工具，以及就监控机制。elk
    
-5. zookeeper和eureka作为注册中心的区别
+5. zookeeper和eureka作为注册中心的区别  ***
 
    > - cap模型的支持：zookeeper保证的是cap定理中的cp，它的集群模式模式是主从模式，在一个时间点只有一个leader真正的对外提供服务，其它follower负责冗余备份；而eureka保证的事cap中的ap，它的分布式模式是无主模式，他所有节点都是平等的，客户端访问的任一节点都可以对应的提供服务。如果某个节点发送故障停机，其请求会交给其它节点来实现，它很难保证各个节点数据的实时一致性。通过各节点时候实时同步，保证的是最终一致性；
    > - 是否支持数据存储：szookeeper支持数据存储，可以作为配置中心；eureka不支持数据存储；
    > - 客户端的变化监听：zookeeper支持订阅监听来实现，eureka通过轮训的方式来实现；
    > - 集群监控：eureka支持metrics（运维可以手机并报警这些度量信息达到监控），zookeeper不支持；
 
-6. 
 
 # vertx
 
