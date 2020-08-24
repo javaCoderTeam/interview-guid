@@ -670,7 +670,7 @@ java基础
 
 20. [synchronized底层实现](https://mp.weixin.qq.com/s?__biz=Mzg2OTA0Njk0OA==&mid=2247484838&amp;idx=1&amp;sn=54b33b4c76e136efac09941b2dd346b3&source=41#wechat_redirect)
 
-    > - 对于synchronized同步代码块，会在代码开始和结束的位置有monitorEnter和minitorExit指令，当执行monitorEnter时，线程就必须获取monitor对象的持有权限（monitor对象存在于每个Java对象的对象头中，synchronized 锁便是通过这种方式获取锁的）。
+    > - 对于synchronized同步代码块，会在代码开始和结束的位置有monitorEnter和minitorExit指令，当执行monitorEnter时，线程就必须获取monitor对象的持有权限（monitor对象存在于每个Java对象的对象头中，获取monitor后，将minitor的进入数设置为1。synchronized 锁便是通过这种方式获取锁的）。
     > - 对于synchronized同步方法，会有ACC_SYNCHRONIZED 标识，表示改方法是同步方法，调用方法前需要获取对象实例的锁
 
 21. Jdk1.6后有的锁优化 ***
@@ -679,7 +679,7 @@ java基础
     >
     > `锁状态`  ：无锁状态，偏向锁状态，轻量级锁状态，重量级锁状态
     >
-    > `锁优化的意义` ：偏向锁和轻量级锁都是为了减少没有多线程竞争的情况下，重量级锁使用操作系统的互斥量带来的性能损耗。
+    > `锁优化的意义` ：synchronized是通过对象内部的监视器对象锁monitor来实现的，对象监视器依赖操作系统的mutex lock来实现的。操作系统实现线程切换需要从用户态切换到内核态，成本非常高。
     >
     > `锁优化的流程`：① 对象的偏向锁会偏向于第一个获取它的线程，JVM 会利用 CAS 操作，在对象头上的 Mark Word 部分设置线程 ID。接下来如果没有其他线程获取该对象的锁，它一直处于偏向锁状态，持有偏向锁的线程会不执行同步操作；②当有第二个线程获取该锁的时候，偏向锁升级为轻量级锁，轻量级锁使用了cas操作 Mark Word 来试图获取锁（`主要解决的是绝大部分情况下是不存在竞争的，不需要同步操作`）③轻量级锁不加锁的进行尝试，当失败后不会挂起线程（`因为挂起线程/恢复线程的操作都需要转入内核态中完成（用户态转换到内核态会耗费时间）`）而是在线程周围进行忙循环，达到一定次数会进一步升级为重量级锁；④重量级锁：编译后的代码块中加入moniterEnter和monitorExist指令；
 
@@ -747,13 +747,6 @@ java基础
     > 2. syn保证三大特性，volatile不保证原子性；
     > 3. syn阻塞，volatile线程不阻塞；
     > 4. syn编译器优化，volatile不优化；
-
-30. 悲观锁和乐观锁
-
-    > - 乐观锁是假设并发冲突不会发生，总是不加锁的执行操作，如果失败，则会进行重试；
-    > - 悲观锁是假设冲突会发生，执行操作的时候就加一个独占锁，共享资源每次都只给一个线程使用，其它线程阻塞，用完后再给其它线程；
-    >
-    > 读多写少的场景适合用乐观锁；写多的场景适合用悲观锁；
 
 31. cas是什么
 
@@ -861,23 +854,38 @@ java基础
 
 2. [为什么hash表的容量一定要是2的整数倍](https://www.cnblogs.com/peizhe123/p/5790252.html)
 
-   > 为了使不同 hash 值发生碰撞的概率更小，尽可能促使元素在哈希表中均匀地散列。
+   > `为了使不同 hash 值发生碰撞的概率更小，尽可能促使元素在哈希表中均匀地散列。`
    >
    > - 2的整数倍减1后，换成二进制后，最后一位肯定是1，这样与hashCode与操作，有可能是奇偶，否则只能是偶数，会浪费一般空间而且不能保证散列均匀；
    >
    > capacity 为 2 的整数次幂的话，为偶数，这样 capacity-1 为奇数，奇数的最后一位是 1，这样便保证了 h&(capacity-1) 的最后一位可能为 0，也可能为 1（这取决于h的值），即与后的结果可能为偶数，也可能为奇数，这样便可以保证散列的均匀性；
    >
    > 而如果 capacity 为奇数的话，很明显 capacity-1 为偶数，它的最后一位是 0，这样 h&(capacity-1) 的最后一位肯定为 0，即只能为偶数，这样任何 hash 值都只会被散列到数组的偶数下标位置上，这便浪费了近一半的空间。
-
+   >
    > - 而与操作是使用取余替代取模，提升计算效率；
    >
-   >    首先，capacity 为 2的整数次幂的话，长度减一后相当于低位的掩码，计算桶的位置 h&(length-1) 就相当于对 length 取模，提升了计算效率；
-   
+   >   首先，capacity 为 2的整数次幂的话，长度减一后相当于低位的掩码，计算桶的位置 h&(length-1) 就相当于对 length 取模，提升了计算效率；
+
 3. [hashmap多线程操作导致死循环](https://coolshell.cn/articles/9606.html) 
 
    [hashmap死循环](https://blog.csdn.net/xuefeng0707/article/details/40797085)
 
    > hashmap在多线程的情况下进行rehash操作会导致死循环；
+   >
+   > **例子**
+   >
+   > 当线程A执行到链表元素a时，得出它的next元素是b，刚好时间片切换到线程B，线程B将a，b两个元素都倒置存入到新的tab中，注意，现在b的next就是a了！正当此时，线程A醒来，在线程A中，a的next是b。。。。
+   > 也就是说，对于线程a来说，a的next是b，而b的next是a，完美，环链形成。
+   >
+   >  
+   >
+   > 1.7因为采用了头插法，头插法首尾颠倒。
+   >
+   > 1.8中 一条链表要做数据迁移到新的tab下，那么这个散列地址的算法跟hashmap7已经有了区别，它首先需要经过e.hash & oldCap这行代码来决定链表元素的高低位置，等于是分为了两条链表，低位元素仍然在老的位置，而高位元素却到了当前位置+oldCap的位置，一条链表被拆成了两条。这样做的好处如下：
+   > ①省却了再次计算hash值的开销，避免每个key都进行rehash
+   > ②采用尾插法，避免了环链的形成
+   >
+   > 
 
 4. rehash算法
 
@@ -955,7 +963,7 @@ java基础
    > 1. 在java 1.8中，如果链表的长度超过了8并且它的hash桶大于等于64的时候，那么链表将转换为红黑树。
    >    - 把时间复杂度从O（n）变成O（logN）提高了效率
    > 2. 发生hash碰撞时，java 1.7 会在链表的头部插入，而java 1.8会在链表的尾部插入
-   >    - 因为JDK1.7是用单链表进行的纵向延伸，当采用头插法时会容易出现逆序且环形链表死循环问题。但是在JDK1.8之后是因为加入了红黑树使用尾插法，能够避免出现逆序且链表死循环的问题。
+   >    - 因为JDK1.7是用单链表进行的纵向延伸，当采用头插法时会容易出现逆序且环形链表死循环问题。但是在JDK1.8之后是因为加入了红黑树使用尾插法，能够避免出现逆序且链表死循环的问题。采用`复制整个链表而不是操作原链的方式` ??
    > 3. 在java 1.8中，Entry被Node替代(换了一个马甲)。
    > 4. 获取hashCode时候的扰动函数由 9次扰动处理=4次位运算+5次异或，而JDK1.8只用了2次扰动处理=1次位运算+1次异或；
    > 5. 扩容后的元素的存储位置的计算：
@@ -972,7 +980,7 @@ java基础
 
 10. hashMap的modCount用来的作用
 
-   > modCount字段是用来记录hashmap内部结构发生变化的次数，主要用于迭代的快速失败。例如put新键值对，如果某个key对应的value被覆盖不属于结构变化。遍历过程中改变hashMap的内部结构则会出现ConcurrentModificationException。
+    >  modCount字段是用来记录hashmap内部结构发生变化的次数，主要用于迭代的快速失败。例如put新键值对，如果某个key对应的value被覆盖不属于结构变化。遍历过程中改变hashMap的内部结构则会出现ConcurrentModificationException。
 
 11. 多线程操作hashMap会出现什么问题
 
@@ -994,16 +1002,84 @@ java基础
     >
     > - arrayList和hashmap就使用modCount字段来记录表机构修改的次数，来和遍历过程中获取的次数进行对比，如果不一致，则fail-fast;
 
-14. concurrentHashMap
+14. concurrentHashMap ***
 
     [concurrentHashMap](https://www.ibm.com/developerworks/cn/java/java-lo-concurrenthashmap/index.html)
 
-    [concurrentHashMap-1.8](https://www.cnblogs.com/yangming1996/p/8031199.html)
+    [concurrentHashMap-1.8](https://www.cnblogs.com/yangming1996/p/8031199.html) 
 
     > `jdk1.7与1.8的实现机制`
     >
     > - Jdk1.7采用的分段锁技术，整个hash表被分成多个段，每个段对应一个segment锁。段与段之间的可以并发访问，同一个段之间并发访问需要获取锁；
-    > - Jdk1.8取消了segment分段锁机制，jdk1.8主要使用了UNsafe类的cas自旋赋值(putVal操作中桶位置添加节点)+sychronize同步(初始化Node数组以及向桶桶添加元素)+lockSupport阻塞等手段实现高效并发。使用数组加链表+红黑树取代了数组+链表。
+    >
+    >   >  ```java
+    >   > public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
+    >   >         implements ConcurrentMap<K, V>, Serializable {
+    >   > 
+    >   >     final Segment<K,V>[] segments;
+    >   > 
+    >   >     static final class Segment<K,V> extends ReentrantLock implements Serializable {
+    >   >         transient volatile HashEntry<K,V>[] table;
+    >   >     }
+    >   >     
+    >   >     static final class HashEntry<K,V> {
+    >   >         final int hash;
+    >   >         final K key;
+    >   >         volatile V value;
+    >   >         volatile HashEntry<K,V> next;
+    >   >         // ... 省略 ...
+    >   >     }
+    >   > }
+    >   > 
+    >   >  ```
+    >   >
+    >   > 1.7 中ConcurrentHashMap的扩容只针对每个segment中的HashEntry数组进行扩容。
+    >   >
+    >   > ConcurrentHashMap在rehash的时候是有锁的，所以在rehash的过程中，其他线程无法对segment的hash表做操作，这就保证了线程安全。
+    >   >
+    >   > 
+    >
+    > - JDK1.8中的ConcurrentHashMap不再使用Segment分段锁，而是以table数组的头结点作为synchronized的锁。 **transient** **volatile** Node<K,V>[] table;
+    >
+    >   > - 使用volatile保证当Node中的值变化时对于其他线程是可见的
+    >   >
+    >   >   >  ```java
+    >   >   > static class Node<K,V> implements Map.Entry<K,V> {
+    >   >   >         final int hash;
+    >   >   >         final K key;
+    >   >   >         volatile V val;
+    >   >   >         volatile Node<K,V> next;
+    >   >   >   }
+    >   >   >  ```
+    >   >   >
+    >   >   > Node中的val和next都被volatile关键。也就是我们改动val的值或者next的值对于其他线程是可见的。`因为volatile关键字，会在读指令前插入读屏障，可以让高速缓存中的数据失效，重新从主内存加载数据`
+    >   >   >
+    >   >   > 
+    >   >
+    >   > - 使用table数组的头结点作为synchronized的锁来保证写操作的安全
+    >   >
+    >   >   >  ```java
+    >   >   >                 //头结点不为null，使用synchronized加锁
+    >   >   >          synchronized (f) {
+    >   >   >               if (tabAt(tab, i) == f) {
+    >   >   >                 if (fh >= 0) {
+    >   >   >                 //此时hash桶是链表结构
+    >   >   >                 binCount = 1;
+    >   >   >  ```
+    >   >
+    >   > - 当头结点为null时，使用CAS操作来保证数据能正确的写入。
+    >   >
+    >   >   tabAt方法通过Unsafe.getObjectVolatile()的方式获取数组对应index上的元素，getObjectVolatile作用于对应的内存偏移量上，是具备volatile内存语义的
+    >   >
+    >   >   >  ```java
+    >   >   > //当头结点为null,则通过casTabAt方式写入
+    >   >   >  else if ((f = tabAt(tab, i = (n - 1) & hash)) == null) {
+    >   >   >         if (casTabAt(tab, i, null,
+    >   >   >                    new Node<K,V>(hash, key, value, null)))
+    >   >   >                     break;      
+    >   >   >             }
+    >   >   > 
+    >   >   >  ```
     >
     > ConcurrentHashMap的JDK8与JDK7版本的并发实现相比，最大的区别在于JDK8的锁粒度更细，理想情况下talbe数组元素的大小就是其支持并发的最大个数，在JDK7里面最大并发个数就是Segment的个数，默认值是16。
     >
@@ -1015,23 +1091,26 @@ java基础
     >
     > `sizeCtl 属性`：代表是初始化哈希表，还是扩容 rehash 的过程
     >
-    > - 未初始化：
+    > - **未初始化**：
     >
-    > - - sizeCtl=0：表示没有指定初始容量。
+    >   - sizeCtl=0：表示没有指定初始容量。
+    >
     >   - sizeCtl>0：表示初始容量。
     >
-    > - 初始化中：
+    > - **初始化中**：
     >
-    > - - sizeCtl=-1,标记作用，告知其他线程，正在初始化
+    >   - sizeCtl=-1,标记作用，告知其他线程，正在初始化
     >
-    > - 正常状态：
+    > - **正常状态**：
     >
-    > - - sizeCtl=0.75n ,扩容阈值
+    >   - sizeCtl=0.75n ,扩容阈值
     >
-    > - 扩容中:
+    > - **扩容中**:
     >
-    > - - sizeCtl < 0 : 表示有其他线程正在执行扩容
+    >   - sizeCtl < 0 : 表示有其他线程正在执行扩容
+    >
     >   - sizeCtl = (resizeStamp(n) << RESIZE_STAMP_SHIFT) + 2 :表示此时只有一个线程在执行扩容
+    >
     >
     > `putval方法`
     >
@@ -1058,8 +1137,6 @@ java基础
     > - volatile`类型的变量`baseCount记录元素的个数，通过cas的方式修改baseCount
     >
     >   
-    >
-    > 
     >
     > `concurrentHashMap 1.7`:
     >
@@ -1154,8 +1231,7 @@ java基础
     > - 发现transferIndex=0,即所有node均已分配
     > - 发现扩容线程已经达到最大扩容线程数
     >
-    > 
-
+    
 16. [一致性hash算法](https://www.jianshu.com/p/e968c081f563)
 
     > `意义`：
@@ -1408,7 +1484,15 @@ java基础
    >class.forName()静态方法；
    >classLoader.loadClass()方法;
 
-   18. 双亲委派模型
+   18. [new一个对象后执行的操作](https://www.cnblogs.com/JackPn/p/9386182.html)  ***
+
+       >  new一个对象就可以分为两个过程：**加载并初始化类**和**创建对象**
+       >
+       > 
+       >
+       > 
+
+   19. 双亲委派模型
 
    > - 被不同类加载器加载的同名类，也认为是不同的类。
    > - 双亲委派模型。分为两种类加载器： 1 是启动类加载器 ，是虚拟机自身的一部分；2 是所有的其他类加载器，这些类加载器都由java语言实现。独立于虚拟机外部，全部继承自java.lang.ClassLoader抽象类。类加载器具体层次关系：启动类加载器->扩展类加载器->系统类加载器->自定义类加载器。每一个类的加载，会优先由父加载器来加载。这种方式就称为双亲委派，双亲委派保证了java基本类的不会被破坏和替代，避免重复加载java类；
@@ -1425,6 +1509,9 @@ java基础
        >  java.sql.Driver 是最为典型的 SPI 接口，java.sql.DriverManager 通过扫包的方式拿到指定的实现类，完成 DriverManager的初始化。
        >
        >  SPI Serviceloader 通过线程上下文获取能够加载实现类的classloader，一般情况下是 application classloader，绕过了这层限制，逻辑上打破了双亲委派原则。
+       >
+       >  2. 可覆盖的loadClass方法。双亲委派的实现细节都在loadClass方法中，而该方法是一个**protected**的，意味着子类可以覆盖该方法，从而可绕过双亲委派逻辑
+       >  3. 程序动态性的需求，比如热部署。OSGi已经成为业界事实上的Java模块化标准
 
    20. java虚拟机调优记录
 
@@ -1645,7 +1732,64 @@ java基础
    >
    >   在springboot的自动装配过程中，最终会加载META-INF/spring.factories文件，而加载的过程是由SpringFactoriesLoader加载的。从CLASSPATH下的每个Jar包中搜寻所有META-INF/spring.factories配置文件，然后将解析properties文件，找到指定名称的配置后返回。需要注意的是，其实这里不仅仅是会去ClassPath路径下查找，会扫描所有路径下的Jar包，只不过这个文件只会在Classpath下的jar包中。
    >
-   >   
+   
+4. [springboot的启动流程](https://juejin.im/post/6844903669998026759)
+
+   > **springApplication对象的初始化**
+   >
+   > > - 使用 `SpringFactoriesLoader`查找并加载 classpath下 `META-INF/spring.factories`文件中所有可用的 `ApplicationContextInitializer`
+   > > - 使用 `SpringFactoriesLoader`查找并加载 classpath下 `META-INF/spring.factories`文件中的所有可用的 `ApplicationListener`
+   >
+   > **Run方法的运行**
+   >
+   > - 通过 `SpringFactoriesLoader` 加载 `META-INF/spring.factories` 文件，获取并创建 `SpringApplicationRunListener` 对象
+   > - 然后由 `SpringApplicationRunListener` 来发出 **starting 消息**
+   > - 创建参数，并配置当前 SpringBoot 应用将要使用的 Environment
+   > - 完成之后，依然由 `SpringApplicationRunListener` 来发出 **environmentPrepared 消息**
+   > - 创建 `ApplicationContext`,初始化 `ApplicationContext`，并设置 Environment，加载相关配置等
+   > - 由 `SpringApplicationRunListener` 来发出 **contextPrepared 消息**，告知SpringBoot 应用使用的 `ApplicationContext` 已准备OK
+   > - 将各种 beans 装载入 `ApplicationContext`，继续由 `SpringApplicationRunListener` 来发出 **contextLoaded 消息**，告知 SpringBoot 应用使用的 `ApplicationContext` 已装填OK
+   > - refresh ApplicationContext，完成IoC容器可用的最后一步
+   > - 由 `SpringApplicationRunListener` 来发出 **started 消息**
+   > - 完成最终的程序的启动
+   > - 由 `SpringApplicationRunListener` 来发出 **running 消息**，告知程序已运行起来了
+
+5. [自定义的springboot stater ***](https://objcoding.com/2018/02/02/Costom-SpringBoot-Starter/)
+
+   >  SpringBoot 项目就是由一个一个 Starter 组成的，一个 Starter 代表该项目的 SpringBoot 起步依赖
+   >
+   >  自定义stater类步骤
+   >
+   > 1. 创建一个项目引入springboot的autoconfigure包，pom中项目的artifact定位为spring-boot-stater-helloworld
+   >
+   > 2. 创建业务类，比如redis基本方法类；
+   >
+   > 3. 创建属性类，就是需要注入的配置；
+   >
+   > 4. 创建配置类，就是HelloAutoConfigration类。
+   >
+   >    ```java
+   >    @Configuration
+   >    // 当 HelloworldService 在类路径的条件下
+   >    @ConditionalOnClass({HelloworldService.class})
+   >    // 将 application.properties 的相关的属性字段与该类一一对应，并生成 Bean
+   >    @EnableConfigurationProperties(HelloworldProperties.class)
+   >    ```
+   >
+   > 5. 在resouce的META-INF/spring.factories下创建一个spring.factories文件，配置一个
+   >
+   >    ```properties
+   >    # Auto Configure
+   >    org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.objcoding.starters.helloworld.HelloworldAutoConfiguration
+   >    ```
+
+6. [springboot自动配置](https://mp.weixin.qq.com/s/Be7vAudvvvuCI2EdwPX80Q) ***
+
+   >  @SpringBootApplication ->@EnableAutoConfiguration ->@Import
+   >
+   > 其父类**实现 ImportSelectors 接口下的selectImports() 方法返回的数组（类的全类名）都会被纳入到 Spring 容器中。**
+   >
+   > 由springFactoryLoader加载器加载所有jar包的**META-INF/spring.factories** 文件
 
 # springcloud
 
@@ -1770,18 +1914,25 @@ java基础
     > - 目标对象：被代理的目标对象；
     > - 织入：将切面应用到目标对象并导致代理对象创建的过程；
 
-12. spring对aop的支持
+12. [spring实现aop源码](https://juejin.im/post/6844904015843557389)
 
-    > Spring中AOP代理由Spring的IOC容器负责生成、管理，其依赖关系也由IOC容器负责管理。
+    > 1. 根据documentReader对象 的parseBeanDefinitions方法解析各种标签解析为beanDefinition。
     >
-    > 1. 默认使用Java提供的jdk动态代理来创建AOP代理，这样就可以为任何接口实例创建代理了;
-    > 2. 当需要代理的类不是代理接口的时候，Spring会切换为使用CGLIB代理，也可强制使用CGLIB;
+    > 2. parseAop标签 ：包括pointCut(中有过滤器classFilter、methodMacher)、parseAdvice（before/after处理）、**parseAspect**的定义
     >
-    > 步骤：
+    > 3. 然后向容器中注册AspectJAwareAdvisorAutoProxyCreator对象，用于创建代理类；
     >
-    > 1. 定义普通业务组件
-    > 2. 定义切入点，一个切入点可能横切多个业务组件
-    > 3. 定义增强处理，增强处理就是在AOP框架为普通业务组件织入的处理动作
+    > 4. AspectJAwareAdvisorAutoProxyCreator 实现了BeanPostProcessor接口,可以对目标对象实例化之后（postProcessAfterInitialization），创建对应的代理对象。
+    >
+    >    >  **wrapIfNecessary**,
+    >    >
+    >    > 根据pointCut方法进行判断是否需要创建代理对象；查找代理类相关的advisor对象集合；
+    >    >
+    >    > 通过动态代理的方式（2种）生成代理对象；
+    >    >
+    >    > 放入到缓存中
+    >
+    > 
 
 13. [jdk动态代理cglib的区别](https://www.jianshu.com/p/abb674bb418c)
 
@@ -1868,9 +2019,37 @@ java基础
     >  >
     >  > - 事务的切面
     >  >
-    >  >   >  代理对象生成的核心类`AbstractAutoProxyCreator，实现了`BeanPostProcessor接口，会在Bean初始化完成之后通过postProcessAfterInitialization方法生成代理对象。
+    >  >   >  代理对象生成的核心类`AbstractAutoProxyCreator，实现了`BeanPostProcessor接口，会在Bean初始化完成之后通过postProcessAfterInitialization方法生成代理对象。通过`ProxyFactory`的父类构造器实例化了`DefaultAopProxyFactory`类，从其源代码我们可以看到Spring动态代理方式选择策略的实现
     >  >   
     >  > - TransactionInterceptor 中调用invoke方法，然后通过他的支持类`TransactionAspectSupport`的`invokeWithinTransaction`方法进行事务处理，
+    
+20. spring事务和mysql事务的关系
+
+    >  **spring事务**
+    >
+    > - 编程式事务：事务管理代码嵌入到业务方法中来控制事务的提交和回滚。代码冗余，灵活；
+    > - 声明式事务：利用aop原理从代码中将事务管理分离出来。spring不管理事务，他提供了很多事务管理器，接口是（PlatformTransactionManager）。各个平台有自己的实现。
+    >
+    > **事务的传播特性**
+    >
+    >  **REQUIRED 、REQUIRES_NEW。**
+    >
+    > **其它属性**
+    >
+    > 回滚属性、超时和只读属性；
+    >
+    >  
+    >
+    > **关系**
+    >
+    > spring事务本质上使用数据库事务，而数据库事务本质上使用数据库锁，所以spring事务本质上使用数据库锁，开启spring事务意味着使用数据库锁；
+
+21. spring 事务失效的场景
+
+    > 1. Transactional注解标注方法修饰符为非public时，@Transactional注解将会不起作用。(非public方法不能被生成代理类)
+    > 2. 在类内部调用调用类内部@Transactional标注的方法 。Spring AOP技术使用的是动态代理而自己调用自己的过程，并不存在代理对象的调。
+    > 3. 事务方法内部捕捉了异常，没有抛出新的异常，导致事务操作不会进行回滚。
+    > 4. 数据库引擎是否支持事务，MySql的引擎MyIsam不支持事务
 
 # mongodb
 
@@ -1896,13 +2075,20 @@ java基础
 1. [mysql的innodb和mylsam存储引擎实现区别](https://blog.csdn.net/qq_35642036/article/details/82820178) ***
 
    > 1. innodb是支持事务、支持外键等高级功能，带来性能损耗；mylsam是不支持的，所以性能高点；
+   >
    > 2. innodb支持行级锁和表锁；mylsam只支持表锁；
-   > 4. innodb的主键索引和数据都放到一个数据文件中，是聚集索引；mylsam是索引和数据文件是分开存放的，是非聚集索引；
+   >
+   > 3. innodb的主键索引和数据都放到一个数据文件中，是聚集索引；mylsam是索引和数据文件是分开存放的，是非聚集索引；
+   >
+   > 4. MyISAM引擎把一个表的总行数存在了磁盘上，因此执行count(*)的时候会直接返回这个数，效率很高；（加了where条件的话，也是需要扫描的）
+   >
+   >    而InnoDB引擎就麻烦了，它执行count(*)的时候，需要把数据一行一行地从引擎里面读出来，然后累积计数。
+   >
    > 5. 实现结构上的区别：
-   > 
+   >
    >  - 第一个重大区别是InnoDB的数据文件本身就是索引文件。MyISAM索引文件和数据文件是分离的，索引文件仅保存数据记录的地址。而在InnoDB中，表数据文件本身就是按B+Tree组织的一个索引结构，这棵树的叶节点data域保存了完整的数据记录。这个索引的key是数据表的主键，因此InnoDB表数据文件本身就是主索引。
    >   - 第二个InnoDB的辅助索引data域存储相应记录主键的值而不是地址。换句话说，InnoDB的所有辅助索引都引用主键作为data域，mylsam使用data域中存放的事数据行记录的地址；
-   > 
+   >
    
 2. [一颗b+树可以存储多少数据  ***](mysql b+树能存多少条数据)
 
@@ -1927,7 +2113,7 @@ java基础
 
    > - 脏读：一个事务读取了另一个未提交事务的数据；
    > - 不可重复读：同一个事务多次查询读取到的同一条数据的某个字段不一致，这是被另一个事务修改了，侧重点是修改；
-   > - 幻读：同一个事务中，查询的数据的数量不一致，有可能是修改了或者新增，因为另一个事务进行了删除或者新增操作，侧重点是增删。这个用到的查询条件是非主键索引、非唯一索引；
+   > - 幻读：事务A是范围查询，另一个事务在范围内增加了数据，事务A再次查询发现数量变了，这就是幻读；
 
 5. 事务的隔离级别
 
@@ -1972,7 +2158,24 @@ java基础
    > - 批量操作，尽量避免频繁读写
    > - 数据库尽量使用集群，读写分离；
 
-8. [explain进行sql分析](https://blog.csdn.net/why15732625998/article/details/80388236) ***
+8. mysql索引失效的情况
+
+   > 1. 查询条件使用函数在索引列上
+   > 4. like "%_" 百分号在前. 
+   > 5. or关键字使用
+   > 4. not in ,not exist 不等于等反向操作； 
+   > 6. 单独引用复合索引里非第一位置的索引列. 
+   > 7. 字符型字段为数字时在where条件里不添加引号（隐式转换）. 
+   >7. 对小表查询；
+   > 
+   
+9. [联合索引的使用注意事项](https://blog.csdn.net/b129266314387022/article/details/101648513?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-6.channel_param&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-6.channel_param)
+
+   >  
+   >
+   > 
+
+10. [explain进行sql分析](https://blog.csdn.net/why15732625998/article/details/80388236) ***
 
    > [mysql慢查询 + explain使用](https://blog.csdn.net/wuhuagu_wuhuaguo/article/details/80625124)
    >
@@ -1993,41 +2196,52 @@ java基础
    > - Type
    >
    >   > - System：表只有一行记录；
-   >   >
-   >   > - Const：表示通过索引一次就找到了，const用于比较primary key 或者unique索引。因为只匹配一行数据，所以很快；
-   >   >
-   >   > - eq_ref: 只匹配到一行的时候，一般在连表查询的时候匹配到一行，或者等值计算的时候 =；
-   >   >
-   >   > - ref : 非唯一性索引扫描，根据索引查询匹配到多行或者关联查询匹配到多行；
-   >   >
-   >   > - index_merge：在一个查询里面很有多索引用被用到，可能会触发`index_merge`的优化机制。
-   >   >
-   >   > - range：只有给定范围内的行才能被检索，使用索引来查询出多行。  `key_len`列表示使用的最长的 key 部分。 这个类型的`ref`列是NULL；
-   >   >
-   >   > - Index：`index`类型和`ALL`类型一样，区别就是`index`类型是扫描的索引树。
-   >   >
-   >   >   如果索引是查询的覆盖索引，就是说索引查询的数据可以满足查询中所需的所有数据，则只扫描索引树，不需要回表查询。 在这种情况下，explain 的 `Extra` 列的结果是 `Using index`。仅索引扫描通常比ALL快，因为索引的大小通常小于表数据；
+   >   >- Const：表示通过索引一次就找到了。是根据主键或者唯一二级索引与常数进行等值匹配；
+   >   > - eq_ref: 连接查询中，如果被驱动表是通过主键或者唯一二级索引列等值匹配的方式进行访问；
+   >   >- ref : 当通过普通的二级索引列与常量进行等值匹配时来查询某个表；
+   >   > - index_merge：一般情况下对于某个表的查询只能使用到一个索引，但我们唠叨单表访问方法时特意强调了在某些场景下可以使用`Intersection`、`Union`、`Sort-Union`这三种索引合并的方式来执行查询。`多个索引的顺序io和单个索引的顺序io和回表随机io`；
+   >   >- range：只有给定范围内的行才能被检索，使用索引来查询出多行。  `key_len`列表示使用的最长的 key 部分。 这个类型的`ref`列是NULL；
+   >   > - Index：`index`类型和`ALL`类型一样，区别就是`index`类型是扫描的索引树。当我们可以使用索引覆盖，但需要扫描全部的索引记录时，该表的访问方法就是`index` (联合索引中where条件是非前缀索引)
    >   >
    >   
    > - key_len
    >
    >   >  表示索引中使用的字节数，可通过该列计算查询中使用的索引的长度，在`不损失精确性的情况下，长度越短越好`。key_len显示的值为索引字段的最大可能长度，并非实际使用长度
+   >   >
+   >   >  > - 对于使用固定长度类型的索引列来说，它实际占用的存储空间的最大长度就是该固定值，对于指定字符集的变长类型的索引列来说，比如某个索引列的类型是`VARCHAR(100)`，使用的字符集是`utf8`，那么该列实际占用的最大存储空间就是`100 × 3 = 300`个字节。
+   >   >  > - 如果该索引列可以存储`NULL`值，则`key_len`比不可以存储`NULL`值时多1个字节
+   >   >  > - 对于变长字段来说，都会有2个字节的空间来存储该变长列的实际长度。
+   >   >  >
+   >   >  > 
    >
    > - key：实际用到的索引
    >
-   > - rows：返回结果所需检查的行数
+   > - Ref : 当使用索引列等值匹配的条件去执行查询时，也就是在访问方法是`const`、`eq_ref`、`ref`、`ref_or_null`、`unique_subquery`、`index_subquery`其中之一时，`ref`列展示的就是与索引列作等值匹配的东东是个啥
+   >
+   > - rows：如果查询优化器决定使用全表扫描的方式对某个表执行查询时，执行计划的`rows`列就代表预计需要`扫描的行数`，如果使用索引来执行查询时，执行计划的`rows`列就代表预计扫描的索引记录行数
    >
    > - Extra： Using filesort、Using temporary（ORDER BY）[extra详解](https://www.cnblogs.com/kerrycode/p/9909093.html)
    >
-   >   > - Using where：如果不读取表的所有数据（where过滤数据），或不是仅仅通过索引就可以获取所有需要的数据；
+   >   > - Using where：当使用索引访问来执行对某个表的查询，并且该语句的`WHERE`子句中有除了该索引包含的列之外的其他搜索条件时；
+   >   >
    >   > - Using index：mysql将使用覆盖索引，以避免访问表；
-   >   > -  Using filesort：当Query 中包含 ORDER BY 操作，而且无法利用索引完成排序操作的时候，MySQL Query Optimizer 不得不选择相应的排序算法来实现。
+   >   >
+   >   > - Using filesort：当Query 中包含 ORDER BY 操作，而且无法利用索引完成排序操作的时候，MySQL Query Optimizer 不得不选择相应的排序算法来实现。
+   > >
    >   > - Using temporary：当 MySQL 在某些操作中必须使用临时表时，在 Extra 信息中就会出现Using temporary 。主要常见于 GROUP BY 和 ORDER BY 等操作中。
-   >   > - Using Index Condition：会先条件过滤索引，过滤完索引后找到所有符合索引条件的数据行，随后用 WHERE 子句中的其他条件去过滤这些数据行；一般是联合索引中只用了部分所以你的情况？
-   >
+   >   >
+   >   > - Using Index Condition：某种情况下使用覆盖索引的情况了；
+   >   >
+   >   >   ```
+   >   >   SELECT * FROM s1 WHERE key1 > 'z' AND key1 LIKE '%a';
+   >   >   指定的二级索引记录，先不着急回表，而是先检测一下该记录是否满足key1 LIKE '%a'这个条件，如果这个条件不满足，则该二级索引记录压根儿就没必要回表
+   >   >   ```
+   >   >
+   >   >   
+   > 
    >   
 
-9. [关于SQL数据库中的范式](https://blog.csdn.net/sinat_35512245/article/details/52923516)
+11. [关于SQL数据库中的范式](https://blog.csdn.net/sinat_35512245/article/details/52923516)
 
    > - 第一范式：强调的是列的原子性，即不能再分成其它几列；
    >
@@ -2043,19 +2257,43 @@ java基础
    >   第三范式:不存在非主属性对关键字的传递函数依赖关系。
    >   ```
 
-10. [mysql锁的分类](https://blog.csdn.net/qq_34337272/article/details/80611486) ***
+11. [mysql锁的分类](https://blog.csdn.net/qq_34337272/article/details/80611486) ***
 
-   > - 表级锁粒度最大，加锁资源消耗少，最简单，触发锁的冲突高；更新大表中的大批量数据的时候用表锁效率最高；
+   > - `表级锁`粒度最大，加锁资源消耗少，最简单，触发锁的冲突高；更新大表中的大批量数据的时候用表锁效率最高；
    >
-   > - 行级锁粒度最小，加锁资源消耗大，实现起来复杂，但是表的并发度最大；包括record lock、gap lock（范围锁，防止别的事务新增幻影行）、next-key lock 锁定记录本身以及间隙，可解决幻读问题；
+   > - `行级锁` 粒度最小，加锁资源消耗大，实现起来复杂，但是表的并发度最大；包括record lock、next-key lock 锁定记录本身以及间隙，可解决幻读问题；(**只有通过索引条件检索数据，InnoDB才使用行级锁，否则，InnoDB将使用表锁！**)
    >
-   > - 共享锁：事务T对数据A加上共享锁，其它事务只能对数据A加共享锁，不能加排它锁，获取共享锁的事务只能读取数据，不能修改数据；
+   > - `间隙锁` ：gap lock（范围锁，防止别的事务新增幻影行）。对于键值在条件范围内但并不存在的记录，叫做“间隙（GAP)”，InnoDB也会对这个“间隙”加锁，这种锁机制就是所谓的间隙锁（Next-Key锁）
    >
-   > - 排它锁：事务T对数据A加上排它锁后，其它事务不能对A加任何类型的锁，获取排它锁的事务既可以修改数据也可以读数据；
+   > - `乐观锁` 是假设并发冲突不会发生，总是不加锁的执行操作，如果失败，则会进行重试；
    >
-   > - 意向锁：innodb的意向锁主要用户多粒度的锁并存的情况。比如事务A要在一个表上加S锁，如果表中的一行已被事务B加了X锁，那么该锁的申请也应被阻塞。如果表中的数据很多，逐行检查锁标志的开销将很大，系统的性能将会受到影响。为了解决这个问题，可以在表级上引入新的锁类型来表示其所属行的加锁情况，这就引出了“意向锁”的概念。
+   > - `悲观锁`是假设冲突会发生，执行操作的时候就加锁。**共享锁和排它锁是悲观锁的不同的实现，它俩都属于悲观锁的范畴。** 读多写少的场景适合用乐观锁；写多的场景适合用悲观锁
+   >
+   >   > - 共享锁：事务T对数据A加上共享锁，其它事务只能对数据A加共享锁，不能加排它锁，获取共享锁的事务只能读取数据，不能修改数据； 
+   >   >
+   >   > - 排它锁：事务T对数据A加上排它锁后，其它事务不能对A加任何类型的锁，获取排它锁的事务既可以修改数据也可以读数据；
+   >
+   > - `意向锁`：innodb的意向锁主要用户多粒度的锁并存的情况。比如事务A要在一个表上加S锁，如果表中的一行已被事务B加了X锁，那么该锁的申请也应被阻塞。如果表中的数据很多，逐行检查锁标志的开销将很大，系统的性能将会受到影响。为了解决这个问题，可以在表级上引入新的锁类型来表示其所属行的加锁情况，这就引出了“意向锁”的概念。
+   >
+   > - `IS、IX锁是表级锁，它们的提出仅仅为了在之后加表级别的S锁和X锁时可以快速判断表中的记录是否被上锁，以避免用遍历的方式来查看表中有没有上锁的记录，也就是说其实IS锁和IX锁是兼容的，IX锁和IX锁是兼容的`
    >
    >   举个例子，如果表中记录1亿，事务A把其中有几条记录上了行锁了，这时事务B需要给这个表加表级锁，如果没有意向锁的话，那就要去表中查找这一亿条记录是否上锁了。如果存在意向锁，那么假如事务Ａ在更新一条记录之前，先加意向锁，再加Ｘ锁，事务B先检查该表上是否存在意向锁，存在的意向锁是否与自己准备加的锁冲突，如果有冲突，则等待直到事务Ａ释放，而无须逐条记录去检测。事务Ｂ更新表时，其实无须知道到底哪一行被锁了，它只要知道反正有一行被锁了就行了。
+   >   
+   > - gap锁的例子
+   >
+   >   >  假如emp表中只有101条记录，其empid的值分别是1,2,......,100,101。
+   >   > **InnoDB存储引擎的间隙锁阻塞例子**
+   >   >
+   >   > ```
+   >   > 当前session对不存在的记录加for update的锁：	
+   >   > mysql> select * from emp where empid = 102 for update;
+   >   > 
+   >   > 这时，如果其他session插入empid为201的记录（注意：这条记录并不存在），也会出现锁等待：
+   >   > mysql>insert into emp(empid,...) values(201,...);
+   >   > 
+   >   > # 另一个例子 ？？？成立吗？
+   >   > forupdate时候，id为主键，RR策略时候，锁住了的条件符合的行，但是如果条件找不到任何列，锁住的是整个表，
+   >   > ```
 
 11. 如何避免死锁
 
@@ -2118,10 +2356,7 @@ java基础
     > - 尽可能减少事务的粒度，比如控制事务大小，而从减少锁定资源量和时间长度，从而减少锁的竞争等，提供性能。
     > - 尽可能低级别事务隔离，隔离级别越高，并发的处理能力越低。
     >
-    > 
-    >
-    > 
-
+    
 14. **varchar和char 的区别：**
 
     >  char是一种固定长度的类型，varchar则是一种可变长度的类型，
@@ -2130,24 +2365,23 @@ java基础
     >
     > 在varchar(M)类型的数据列里，每个值只占用刚好够用的字节再加上一个用来记录其长度的字节（即总长度为L+1字节）．
     >
-    > 
-
+    
 15. [mysql加锁详解系列](https://www.cnblogs.com/crazylqy/p/7611069.html)
 
-16. mysql在rr隔离级别下如何解决幻读 ***
+16. mysql在rr隔离级别下如何解决幻读 [MySQL的InnoDB的幻读问题](http://blog.sina.com.cn/s/blog_499740cb0100ugs7.html)***
 
-    > 使用行锁加间隙锁来解决的；
+    > 读是mvcc实现的一致性读（readView）；写是使用行锁加间隙锁来解决的；
     >
+    > - 什么时候会取得gap lock或nextkey lock  这和隔离级别有关,`只在REPEATABLE READ或以上的隔离级别下的特定操作才会取得gap lock或nextkey lock`。
+    > - mysql 的重复读解决了幻读的现象，但是需要 加上 select for update/lock in share mode 变成当读避免幻读，普通读select存在幻读(`修改操作默认是加锁的,是当前读`)
     > - Repeatable Read隔离级别下，age列上有一个非唯一索引，对应SQL：delete from t1 where age = 10; 首先，通过id索引定位到第一条满足查询条件的记录，加记录上的X锁在GAP上的GAP锁，然后加主键聚簇索引上的记录X锁，然后返回；然后读取下一条，重复进行。直至进行到第一条不满足条件的记录[11,f]，此时，不需要加记录X锁，但是仍旧需要加GAP锁，最后返回结束。
-    > - 什么时候会取得gap lock或nextkey lock  这和隔离级别有关,只在REPEATABLE READ或以上的隔离级别下的特定操作才会取得gap lock或nextkey lock。
-    > - mysql 的重复读解决了幻读的现象，但是需要 加上 select for update/lock in share mode 变成当读避免幻读，普通读select存在幻读
 
 17. 与mvcc相关的概念
 
     > - 快照读：简单的select操作，属于快照读。`读取的是记录的可见版本` (有可能是历史版本)，不用加锁。
     >- 当前读：插入/更新/删除操作，属于当前读。`读取的是记录的最新版本`，并且当前读返回的记录，都会加上锁（悲观锁、排它锁），保证其他事务不会再并发修改这条记录。
-    > 
-    >- 在MySQL/InnoDB中，所谓的读不加锁，并不适用于所有的情况，而是隔离级别相关的。Serializable隔离级别，读不加锁就不再成立，所有的读操作，都是当前读。
+    > - 在MySQL/InnoDB中，所谓的读不加锁，并不适用于所有的情况，而是隔离级别相关的。Serializable隔离级别，读不加锁就不再成立，所有的读操作，都是当前读。
+    >- **在标准的事务隔离级别定义下，REPEATABLE READ是不能防止幻读产生的。INNODB使用了2种技术手段（MVCC AND GAP LOCK)实现了防止幻读的发生。**
 
 18. MVCC的优点
 
@@ -2166,14 +2400,6 @@ java基础
     >
     > 2. DATA_ROLL_PTR（回滚指针）：回滚的事务段，undo log record(撤销日志记录)，就是重建该行之前的内容；
     > 3. DB_ROW_ID：隐含的自增ID（隐藏主键），如果数据表没有主键，InnoDB会自动以`DB_ROW_ID`产生一个聚簇索引；
-    >
-    > `mvcc有以下特点`：MVCC多版本并发控制指的是 **“维持一个数据的多个版本，使得读写操作没有冲突”** 
-    >
-    > - 乐观锁；
-    >
-    > - 每行数据都存储一个版本，每行数据更新时都更新版本；
-    > - 修改时copy出当前数据，各个事务之间无干扰；
-    > - 保存时比较当前版本，成功则覆盖原纪录；失败则放弃（copy、rollback）；
     >
     > `innodb的实现mvcc修改记录的方式`：
     >
@@ -2210,18 +2436,32 @@ java基础
 
 21. innodb如何实现事务的隔离机制；
 
-    > 1. 加读写锁；
-    > 2. 一致性快照读，即mvcc；
+    > 1. 写加读写锁；
+    > 2. 读使用一致性快照读，即mvcc；
 
-22. mysql如何实现事务的幻读问题？***
+22. [mysql是如何实现可重复读的 ***](https://juejin.im/post/6844904180440629262)
 
-    >  使用record lock加gap锁；
-
-23. [mysql是如何实现可重复读的 ***](https://juejin.im/post/6844904180440629262)
-
+    > `总结`：
+    >
     > - InnoDB 的行数据有多个版本，每个版本都有 row trx_id。
     > - 事务根据 undo log 和 trx_id 构建出满足当前隔离级别的一致性视图。
-    > - 可重复读的核心是一致性读，而事务更新数据的时候，只能使用当前读，如果当前记录的行锁被其他事务占用，就需要进入锁等待。
+    > - 可重复`读的核心是一致性读`。而事务`更新数据的时候，只能使用当前读`，如果当前记录的行锁被其他事务占用，就需要进入锁等待。
+    >
+    > `理解`：
+    >
+    > - 在可重复读隔离级别下，一个事务在启动时，InnoDB 会为事务构造一个数组，用来保存这个事务启动瞬间，当前正在”活跃“的所有事务ID。”活跃“指的是，启动了但还没提交。
+    >
+    >   数组里面事务 ID 为最小值记为低水位，当前系统里面已经创建过的事务 ID 的最大值加 1 记为高水位。
+    >
+    >   这个视图数组和高水位，就组成了当前事务的一致性视图（read-view）。
+    >
+    >   > - 如果 trx_id 小于低水位，表示这个版本在事务启动前已经提交，可见；
+    >   > - 如果 trx_id 大于高水为，表示这个版本在事务启动后生成，不可见；
+    >   > - 如果 trx_id 大于低水位，小于高水位，分为两种情况：
+    >   >   1.  若 trx_id 在数组中，表示这个版本在事务启动时还未提交，不可见；
+    >   >   2.  若 trx_id 不在数组中，表示这个版本在事务启动时已经提交，可见。
+    >
+    > - **InnoDB 就是利用 undo log 和 trx_id 的配合，实现了事务启动瞬间”秒级创建快照“的能力。**
 
 24. [数据库为什么要用B+树结构--MySQL索引结构的实现](https://blog.csdn.net/bigtree_3721/article/details/73650601)、
 
@@ -2272,6 +2512,16 @@ java基础
     > - master将操作语句记录到binlog日志中，然后授予slave远程连接的权限（master一定要开启binlog二进制日志功能；通常为了数据安全考虑，slave也开启binlog功能）。
     > - slave开启两个线程：IO线程和SQL线程。其中：IO线程负责读取master的binlog内容到中继日志relay log里；SQL线程负责从relay log日志里读出binlog内容，并更新到slave的数据库里。
     > - 日志格式：statement level记录操作语句, row level记录操作涉及的所有行数据, mixed level;
+
+28. 给大表加索引
+
+    > ① 创建一个临时的新表，首先复制旧表的结构（包含索引）
+    >
+    > ② 给新表加上新增的字段
+    >
+    > ③ 把旧表的数据复制过来 (limit 分多次复制)，需要把这期间的数据存储下来；
+    >
+    > ④ 删除旧表，重命名新表的名字为旧表的名字
 
 29. [深度分页的优化](https://blog.csdn.net/ydyang1126/article/details/72885246)
 
@@ -3409,6 +3659,31 @@ java基础
 > - TThreadPoolServer：多线程服务模型，使用标准的阻塞式IO；
 > - TNonblockingServer：多线程服务模型，使用非阻塞式IO（需使用TFramedTransport数据传输方式）
 > - THsHaServer，YHsHa引入了线程池去处理（需要使用TFramedTransport数据传输方式），其模型把读写任务放到线程池去处理；
+
+- [rest与rpc的区别](https://baijiahao.baidu.com/s?id=1617168792520937104&wfr=spider&for=pc)
+
+  >  rest是一种`架构风格`，指满足一些约束条件和原则的程序就是restful，它并没有创造新的技术、组件或服务。`它把所有的内容视为资源`。`通过http协议处理数据的通信`，包括资源的增删改查。
+  >
+  > `总结`：
+  >
+  > > - 它是一种架构风格，不是什么新技术；
+  > > - 每一个URI代表一种资源；
+  > > - 客户端和服务器之间，传递这种资源的某种表现层；
+  > > - 客户端通过四个HTTP动词，对服务器端资源进行操作，实现"表现层状态转化"。
+  >
+  > thrift是一种远程调用技术，通过idl语言定义对象和接口，通过rpc编译器生成协议层（支持二进制协议、json协议和压缩的二进制协议）和传输层协议（支持socket协议、framed协议），支持各种阻塞和非阻塞的线程模型。客户端和服务端需要实现相同的接口，实现接口到接口间的调用。
+  >
+  >  
+  >
+  > 对比：
+  >
+  > - Rest 、 性能偏低，HTTP相对更规范，更标准，更通用，对外开放的平台。
+  >
+  > - rpc、tcp协议，性能高、跨进程调用函数，微服务内部更建议使用。
+  >
+  >   
+
+
 
 # [nginx反向代理](https://www.jianshu.com/p/bed000e1830b)
 
