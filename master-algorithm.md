@@ -10,17 +10,15 @@
 
 # 数组
 
-1. 二维数组查找   ArrayFind [240. 搜索二维矩阵 II](https://leetcode-cn.com/problems/search-a-2d-matrix-ii/)
+1. [240. 搜索二维矩阵 II](https://leetcode-cn.com/problems/search-a-2d-matrix-ii/)
 
-> 二维数组，从上到下递增；从左到右递增，查找二维数组中是否含有某个整数  
-
-2. 二分查找 Bsearch [704. 二分查找](https://leetcode-cn.com/problems/binary-search/)
+2. [704. 二分查找](https://leetcode-cn.com/problems/binary-search/)
 
 3. [88. 合并两个有序数组](https://leetcode-cn.com/problems/merge-sorted-array/)
 
-4. 从外到里顺时针打印二维数组  TestClockwiseOutput [剑指 Offer 29. 顺时针打印矩阵](https://leetcode-cn.com/problems/shun-shi-zhen-da-yin-ju-zhen-lcof/)
+4.  [剑指 Offer 29. 顺时针打印矩阵](https://leetcode-cn.com/problems/shun-shi-zhen-da-yin-ju-zhen-lcof/)
 
-5. 两个元素之和 ArraySum [Leetcode-1](https://leetcode-cn.com/problems/two-sum/)
+5. #### [1. 两数之和](https://leetcode-cn.com/problems/two-sum/)
 
 6. #### [69. x 的平方根](https://leetcode-cn.com/problems/sqrtx/)
 
@@ -203,7 +201,7 @@
 
 5. #### [39. 组合总和](https://leetcode-cn.com/problems/combination-sum/)
 
-6. #### [46. 全排列](https://leetcode-cn.com/problems/permutations/) ???
+6. #### [46. 全排列](https://leetcode-cn.com/problems/permutations/) 
 
 7. #### [79. 单词搜索](https://leetcode-cn.com/problems/word-search/)
 
@@ -264,8 +262,6 @@
 3. 插入排序 sort/InsertSort
 4. 归并排序 sort/MergeSort
 5. 快速排序 sort/QuickSort
-6. 堆排序 ？？？
-7. 基数排序
 
 
 

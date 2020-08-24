@@ -47,15 +47,17 @@
 
 21. #### [415. 字符串相加](https://leetcode-cn.com/problems/add-strings/)
 
+22. [15. 三数之和](https://leetcode-cn.com/problems/3sum/)
+
+23. [227. 基本计算器 II](https://leetcode-cn.com/problems/basic-calculator-ii/)
 
 
-1. [15. 三数之和](https://leetcode-cn.com/problems/3sum/)
 
-2. #### [227. 基本计算器 II](https://leetcode-cn.com/problems/basic-calculator-ii/)
+1. [72. 编辑距离](https://leetcode-cn.com/problems/edit-distance/) ???
 
-3. [72. 编辑距离](https://leetcode-cn.com/problems/edit-distance/) ???
+2. [279. 完全平方数](https://leetcode-cn.com/problems/perfect-squares/) ???
 
-4. [279. 完全平方数](https://leetcode-cn.com/problems/perfect-squares/) ???
+3. #### [69. x 的平方根](https://leetcode-cn.com/problems/sqrtx/)
 
 
 
