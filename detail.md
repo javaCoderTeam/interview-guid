@@ -1,18 +1,4 @@
-~~tcp如何保证可靠传输。https://blog.csdn.net/striveb/article/details/84063712  https://blog.csdn.net/Li_Ning_/article/details/52117463~~
 
-~~kafka如何进行leader选举？~~
-
-~~了解redis的zset结构吗~~
-
-thrift的注册机制
-
-如何慢查询sql explain
-
-~~如何定位cpu负载过高的问题~~
-
-~~ioc加载bean的顺序；~~
-
-~~spring如何解决循环依赖；~~
 
 
 

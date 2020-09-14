@@ -2,7 +2,7 @@ java基础
 
 1.   [深入理解hashCode和equals方法](https://www.cnblogs.com/panxuejun/p/5866869.html)
 
-   >- hashCode方法是调用object的hashCode方法计算出hashCode值，然后根据hashCode值计算出对应的位置是否存在元素（hashCode|length-1），如果存在则使用equals()方法进行比较，如果相等则属于同一个元素，如果不相等则属于hash冲突，需要解决hash冲突. 
+   >- hashCode方法是调用object的hashCode方法计算出hashCode值，然后根据hashCode值计算出对应的位置是否存在元素（hashCode&length-1），如果存在则使用equals()方法进行比较，如果相等则属于同一个元素，如果不相等则属于hash冲突，需要解决hash冲突. 
    >
    >- object的equal相当于==，是比较两个对象的内存地址是否相等；string方法重写了equal方法，比较的是两个对象的值是否相等
 
@@ -21,13 +21,15 @@ java基础
 3. [jdk8的新特性](http://www.jianshu.com/p/5b800057f2d8)
 
    > - 函数式接口  (functionalInterface注解  要求只有一个抽象方法）lambdad表达式
+   >
    > - 接口的默认方法和静态方法
-   > - 集合之流式操作
+   >
+   > - [集合之流式操作](https://www.cnblogs.com/CarpenterLee/p/6637118.html)
+   >
+   >   >  
+   >   >
+   >   > 
    
-4.   [ Atomic类如何保证原子性](https://blog.csdn.net/weixin_44902907/article/details/104745116)
-
-     > 使用cas操作。 java的unsafe类。cas使用版本号来解决A-B-A问题，1A-2B-3A，
-     
 5.   谈谈你对 Java 平台的理解？“Java 是解释执行”，这句话正确吗？
 
      > java特点：一次编译，处处运行的跨平台能力；提供垃圾收集功能；
@@ -138,14 +140,14 @@ java基础
 16. [LinkedBlockingQueue和ArrayBlockingQueue的区别](https://blog.csdn.net/Androidlushangderen/article/details/80219264)
 
     > - ArrayBlockingQueue是有界的，而LinkedBlockingQueue默认是无界的（可以通过指定大小来变为有界）。ArrayBlockingQueue有界就意味着我们使用ArrayBlockingQueue必须指定capacity大小。这样的话，内存空间会直接预先分配好，所以在使用LinkedBlockingQueue无界情况下时要考虑到内存实际使用问题，防止内存溢出问题的发生。
-    >- 锁使用的比较。ArrayBlockingQueue内部使用1个锁来控制队列项的插入、取出操作（notEmpty、notFull 都是同一个再入锁的条件变量），而LinkedBlockingQueue则是使用了2个锁来控制，一个名为putLock，另一个是takeLock，但是锁的本质都是ReentrantLock。因为LinkedBlockingQueue使用了2个锁的情况下，所以在一定程度上LinkedBlockingQueue能更好支持高并发的场景操作，这里指的是并发性上，当然根据官方文档的描述LinkedBlockingQueue的吞吐量也比较高。
+    >- 锁使用的比较。ArrayBlockingQueue内部使用1个锁来控制队列项的插入、取出操作（notEmpty、notFull 都是同一个可重入锁的条件变量），而LinkedBlockingQueue则是使用了2个锁来控制，一个名为putLock，另一个是takeLock，但是锁的本质都是ReentrantLock。LinkedBlockingQueue的吞吐量也比较高。
     > -  SynchronousQueue，在 Java 6 中，其实现发生了非常大的变化，利用 CAS 替换掉了原本基于锁的逻辑，同步开销比较小。它是 Executors.newCachedThreadPool() 的默认队列。
 
 17. 为什么需要 ConcurrentHashMap？
 
     > -  Hashtable 本身比较低效，因为它的实现基本就是将 put、get、size 等各种方法加上“synchronized”。简单来说，这就导致了所有并发操作都要竞争同一把锁，一个线程在进行同步操作时，其他线程只能等待，大大降低了并发操作的效率。
     >
-    > - 前面已经提过 HashMap 不是线程安全的，并发情况会导致类似 CPU 占用 100% 等一些问题，
+    > - 前面已经提过 HashMap 不是线程安全的，并发情况下解决hash冲突会覆盖元素，扩容时会导致 CPU 占用 100% 等一些问题。
     >
     > - 那么能不能利用 Collections 提供的同步包装器来解决问题呢？我们发现同步包装器只是利用输入 Map 构造了另一个同步版本，所有操作虽然不再声明成为 synchronized 方法，但是还是利用了“this”作为互斥的 mutex，没有真正意义上的改进！
 
@@ -269,6 +271,7 @@ java基础
 24. java并发包提供了哪些工具类 ***
 
     > - 提供了比 synchronized 更加高级的各种同步结构，包括 CountDownLatch、CyclicBarrier、Semaphore 、reentrantLock、reentrantReadWriteLock等，可以实现更加丰富的多线程操作，比如利用 Semaphore 作为资源控制器，限制同时进行工作的线程数量。
+    > - atomic下的原子类；
     > - 各种线程安全的容器，比如最常见的 ConcurrentHashMap、有序的 ConcurrentSkipListMap，或者通过类似快照机制，实现线程安全的动态数组 CopyOnWriteArrayList 等。
     > - 各种并发队列实现，如各种 BlockedQueue 实现，比较典型的 ArrayBlockingQueue、 SynchorousQueue 或针对特定场景的 PriorityBlockingQueue 等。
     > - 强大的 Executor 框架，可以创建各种不同类型的线程池，调度任务运行等，绝大部分情况下，不再需要自己从头实现线程池和任务调度器。
@@ -277,8 +280,8 @@ java基础
 
 25. [线程池并发执行，批量获取返回结果](https://blog.csdn.net/u010425776/article/details/54580710)
 
-    > - Callable  +future
-    > - threadPool.invokeAll
+    > - Callable  +future  返回future对象
+    > - threadPool.invokeAll   返回直接过List<Integer>这种的
     > - completetionService  阻塞队列获取结果
 
 26. 并发包中的 ConcurrentLinkedQueue 和 LinkedBlockingQueue 有什么区别？
@@ -290,38 +293,46 @@ java基础
     > ` 队列的实现`：
     >
     > - 有两个特别的[Deque](https://docs.oracle.com/javase/9/docs/api/java/util/Deque.html)实现，ConcurrentLinkedDeque 和 LinkedBlockingDeque。Deque 的侧重点是支持对队列头尾都进行插入和删除，所以提供了特定的方法。
-    > - 
 
 
 # NIO与IO
 
-- [NIO与IO的区别](https://www.cnblogs.com/aspirant/p/8630283.html) ***
-
-- [nio和io的实现](https://github.com/Snailclimb/JavaGuide/blob/master/docs/java/BIO-NIO-AIO.md)
-
 - [bio /nio/aio](https://www.cnblogs.com/aspirant/p/6877350.html)
+
+- [nio](https://tech.meituan.com/2016/11/04/nio.html)
+
+- [详细解释io ***](https://www.cnblogs.com/crazymakercircle/p/10225159.html)
+
+- [操作系统层面理解](https://www.cnblogs.com/twoheads/p/10712094.html)
 
   >`区别`
   >
   >1. io面向的是流，nio面向的是缓冲buffer或者说块；所以nio比io快很多；
-  >- java io是面向流，每次从中读取一个或者多个字节，直到读取所有的字节，它没有任何缓冲的地方；
-  >- nio则是面向缓冲区的，它将数据读取到缓存区，可以在缓冲区中前后移动获取到的数据，更灵活；
+  >
+  >  > - java io是面向流，每次从中读取一个或者多个字节，直到读取所有的字节，它没有任何缓冲的地方；
+  >  > - nio则是面向缓冲区的，它将数据读取到缓存区，可以在缓冲区中前后移动获取到的数据，更灵活；
+  >
   >2. io是阻塞的，nio是非阻塞的；
   >
-  > - io的各种流是阻塞的。这意味着，一个请求来来后创建一个线程，当线程调用read/write方法时，该线程是被阻塞的，只能处理一个socket请求。直到一些数据被读取完，在此期间该线程不能干任何其他事；
-  > - nio是非阻塞的，一个线程负责接口请求，其它多个线程请求写入一些数据到某个通道，不用等他完全写入，这个线程可以同时干别的事情，所以一个单独的线程现在可以管理多个输入和输出通道（channel）。
-  > - NIO通讯是将整个任务切换成许多小任务，由一个线程负责处理所有io事件，并负责分发。它是利用事件监听机制，而不是阻塞监听机制，事件到的时候再触发。NIO线程之间通过wait，notify等方式通讯。保证了每次上下文切换都有意义，减少无谓的进程切换。 
+  >  > - io的各种流是阻塞的。这意味着，一个请求来来后创建一个线程，当线程调用read/write方法时，该线程是被阻塞的，只能处理一个socket请求。直到一些数据被读取完，在此期间该线程不能干任何其他事；
+  >  >
+  >  > - nio是非阻塞的，一个线程负责接口请求，其它多个线程请求写入一些数据到某个通道，不用等他完全写入，这个线程可以同时干别的事情，所以一个单独的线程现在可以管理多个输入和输出通道（channel）。
+  >  > - NIO通讯是将整个任务切换成许多小任务，由一个线程负责处理所有io事件，并负责分发。它是利用事件监听机制，而不是阻塞监听机制，事件到的时候再触发。NIO线程之间通过wait，notify等方式通讯。保证了每次上下文切换都有意义，减少无谓的进程切换。 
   >
   >3. io没有选择器，nio是有selector选择器，Selector(多路复用器)用于监听多个通道的事件（比如：连接打开，数据到达）。因此，单个线程可以监听多个数据通道
   >
-  > 
+  >
   >
   >bio是来一个请求开一个线程，nio是一个线程监听所有的套接字，监测到内核缓存区的数据准备好后，调用一个线程去处理，对于那些处理事件的线程来说，它多数时间都是在有效的工作，而bio，处理事件的线程亦是监听socket的线程，只要socket fd没准备好，这个线程就只能阻塞。同样1000个链接，使用nio，只需要10个线程就能搞定，使用bio得需要1000个线程。
   >
   >nio是有一个线程监听多个socketChannal对应的缓冲区是否有数据准备好，事件监听机制。AIO是真正的异步通知，AIO是数据准备好直接回调对应的线程进行处理，使用的是事件和回调机制；
   >
   >
-  
+  >
+  >阻塞，是指等待数据就绪的时线程的阻塞；异步是指io的发起方是karnel，内核负责把数据从内核空间复制到用户空间
+  >
+  >
+
 - nio的组成部分
 
   > - Buffer，高效的数据容器，除了布尔类型，所有原始数据类型都有相应的 Buffer 实现。
@@ -333,18 +344,26 @@ java基础
 
 - 区分同步或异步  和 区分阻塞与非阻塞
 
-  > - `同步或异步`:  两个强调的是流程上的；简单来说，同步是一种可靠的有序运行机制，当我们进行同步操作时，后续的任务是等待当前调用返回，才会进行下一步；而异步则相反，其他任务不需要等待当前调用返回，通常依靠事件、回调等机制来实现任务间次序关系。
-  > - `阻塞与非阻塞` ：强调的是线程是否阻塞，在进行阻塞操作时，当前线程会处于阻塞状态，无法从事其他任务，只有当条件就绪才能继续，比如 ServerSocket 新连接建立完毕，或数据读取、写入操作完成；而非阻塞则是不管 IO 操作是否结束，直接返回，相应操作在后台继续处理。
+  > - `同步或异步`:  同步和异步是指用户空间和内核空间发起调用方式。同步只是，io的发起方是用户空间，内核空间是io请求的接收方。异步则反过来，内核的kereal是io的主动发起方，用户是io请求的被动接收方。
+  > - `阻塞与非阻塞` ：阻塞IO，指的是需要内核IO操作彻底完成后，才返回到用户空间，执行用户的操作。阻塞指的是用户空间程序的执行状态，用户空间程序需等到IO操作彻底完成。传统的IO模型都是同步阻塞IO。（`强调的是线程是否阻塞，在进行阻塞操作时，当前线程会处于阻塞状态，无法从事其他任务，只有当条件就绪才能继续，比如 ServerSocket 新连接建立完毕，或数据读取、写入操作完成`）
 
-- io的的基本介绍
+- io的读写原理
 
-  > - IO 不仅仅是对文件的操作，网络编程中，比如 Socket 通信，都是典型的 IO 操作目标。
-  >
-  > - 输入流、输出流（InputStream/OutputStream）是用于`读取或写入字节`的，例如操作图片文件。
-  > - 而 Reader/Writer 则是`用于操作字符`，增加了字符编解码等功能，适用于类似从文件中读取或者写入文本信息。本质上计算机操作的都是字节，不管是网络通信还是文件读取，Reader/Writer 相当于构建了应用逻辑和原始数据之间的桥梁。
-  > - BufferedOutputStream 等 `带缓冲区的实现，可以避免频繁的磁盘读写`，进而提高 IO 处理效率。这种设计利用了缓冲区，将批量数据进行一次操作，但在使用中千万别忘了 flush。
-
+  > - read系统调用，并不是把数据直接从物理设备，读数据到内存。write系统调用，也不是直接把数据，写入到物理设备。
+  >- read系统调用，是把数据从内核缓冲区复制到进程缓冲区；而write系统调用，是把数据从进程缓冲区复制到内核缓冲区。这个两个系统调用，都不负责数据在内核缓冲区和磁盘之间的交换。底层的读写交换，是由操作系统kernel内核完成的。
   
+- 缓冲区的目的
+
+  > - 缓冲区的目的，是为了减少频繁的系统IO调用。大家都知道，系统调用需要保存之前的进程数据和状态等信息，而结束调用之后回来还需要恢复之前的信息，为了减少这种损耗时间、也损耗性能的系统调用，于是出现了缓冲区。
+  > - 有了缓冲区，操作系统使用read函数把数据从内核缓冲区复制到进程缓冲区，write把数据从进程缓冲区复制到内核缓冲区中。等待缓冲区达到一定数量的时候，再进行IO的调用，提升性能。至于什么时候读取和存储则由内核来决定，用户程序不需要关心。
+  > - 在linux系统中，系统内核也有个缓冲区叫做内核缓冲区。每个进程有自己独立的缓冲区，叫做进程缓冲区。所以，用户程序的IO读写程序，大多数情况下，并没有进行实际的IO操作，而是在读写自己的进程缓冲区。
+
+  - 实现io多路复用的方式和区别
+
+    > - `select`需要构造一个fd数组（**socket文件描述符**，表示“我要监视这些fd是否有IO事件发生，有了就告诉程序处理”。这里为了简化，没有构造要监听写入和异常事件的fd数组）。之后，用`select`监听了`read_fds`中的多个socket的读取时间。调用`select`后，程序会Block住，直到一个事件发生了，或者等到最大1秒钟(`tv`定义了这个时间长度）就返回。
+    > - `poll`这个单词的意思是“轮询”，但是和select不同的是对socket个数没有了1024上限的限制；
+    > - epoll。`select`和`poll`每次都需要把完成的fd列表传入到内核，迫使内核每次必须从头扫描到尾。而epoll完全是反过来的。epoll在内核的数据被建立好了之后，每次某个被监听的fd一旦有事件发生，内核就直接标记之。`epoll_wait`调用时，会尝试直接读取到当时已经标记好的fd列表，如果没有就会进入等待状态。
+    >
 
 
 # java泛型
@@ -366,7 +385,7 @@ java基础
     >      *     3）<T表明该方法将使用泛型类型T，此时才可以在方法中使用泛型类型T。
     >      *     4）与泛型类的定义一样，此处T可以随便写为任意标识，常见的如T、E、K、V等形式的参数常用于表示泛型。
     >      */
-    >     public <T> T genericMethod(Class<T tClass)throws InstantiationException ,
+    >     public <T> T genericMethod(Class<T> tClass)throws InstantiationException ,
     >       IllegalAccessException{
     >             T instance = tClass.newInstance();
     >             return instance;
@@ -392,7 +411,7 @@ java基础
 
 2. volatile关键字的作用 [volatile关键字深入解析](https://www.cnblogs.com/dolphin0520/p/3920373.html)
 
-   > - 保证了变量在多线程间的可见性，即线程读取到的数据都是最新的数据；
+   > - 保证了变量在多线程间的可见性，被volatile修饰的变量在变量前加内存屏障，使本地变量失效，从共享内存中获取最新的值；
    >
    > - 禁止指令重排序；正常情况下jvm为了获取最佳的性能会进行指令重排序，多线程情况下有可能出现意想不到的问题。在进行指令优化时，不能将在对volatile变量访问的语句放在其后面执行，也不能把volatile变量后面的语句放到其前面执行。
    >
@@ -444,7 +463,7 @@ java基础
    >
    >   
 
-4. volatile是如何保证内存可见性的 ，volatile是通过内存屏障和禁止指令重排序来保证内存可见性的
+4. volatile是如何保证内存可见性的 ，volatile是通过内存屏障的禁止指令重排序来保证内存可见性的
 
    > - 当写一个volatile变量时，JVM会把该线程对应的本地内存中的共享变量刷新到主内存。
    >
@@ -452,7 +471,7 @@ java基础
 
 4. volatile是如何保证有序性的
 
-   > - 观察他的汇编语言，加入volatile关键字后，会在总线加一个lock锁前缀指令。lock前缀指令实际上相当于一个`内存屏障（也成内存栅栏）`，它确保指令重排序时不会把其后面的指令排到内存屏障之前的位置，也不会把前面的指令排到内存屏障的后面
+   > - 观察他的汇编语言，加入volatile关键字后，会在总线加一个lock前缀指令实际上相当于一个`内存屏障（也成内存栅栏）`，它确保指令重排序时不会把其后面的指令排到内存屏障之前的位置，也不会把前面的指令排到内存屏障的后面
 
 5. sleep和wait方法的区别，join、yield
 
@@ -463,9 +482,12 @@ java基础
    > - join是将并行运行的线程改为串行；
    > - yield 是告诉调度器，主动让出 CPU。但是有可能马上又参与抢占cpu
 
-5.  ThreadLocal的作用 
+6. [ThreadLocal的作用](https://www.jianshu.com/p/98b68c97df9b) ***
 
-   > 它内部维护了一个threadLocalMap对象，key是线程变量，value是保存了每个线程的的本地变量的副本。采用数据隔离、空间换时间的方式保证多线程的安全。其内部条目是弱引用。当 Key 为 null 时，该条目就变成“废弃条目”，相关“value”的回收，往往依赖于几个关键点，即 set、remove、rehash。
+   > - 每个Thread线程内部都有一个threadLocalMap对象。采用数据隔离、空间换时间的方式保证多线程的安全。
+   > - threadLocalMap对象的 Entry中key只能是ThreadLocal对象，这点被Entry的构造方法已经限定死了，value是保存了每个线程的的本地变量的副本。
+   > - 使用开放地址放解决hash冲突；`建议一个threaLocal只存放一个变量`
+   > - Entry继承自WeakReference（弱引用，生命周期只能存活到下次GC前），但只有Key是弱引用类型的，Value并非弱引用。发生GC时弱引用Key会被回收，而Value不会回收，如果创建ThreadLocal的线程一直持续运行，那么这个Entry对象中的value就有可能一直得不到回收，发生内存泄露。`使用remove操作`；
 
 7. 如何在两个线程之间共享数据 
 
@@ -635,7 +657,7 @@ java基础
     >
     > `不同点`
     >
-    > 1. 实现机制的不同：Synchronized是java的关键字，它是有java虚拟机通过对象头中的mark word字段以及monitor对象来实现的，同步代码块是使用monitorenter和monitorexit指令实现的，同步方法（在这看不出来需要看JVM底层实现）依靠的是方法修饰符上的ACC_SYNCHRONIZED实现。他是`悲观锁机制`，是独占锁，当发生竞争阻塞的时候，获取不到锁的线程会频繁的上下文切换带来性能损耗；
+    > 1. 实现机制的不同：Synchronized是java的关键字，它是通过对象头中的mark word字段以及monitor对象来实现的，同步代码块是使用monitorenter和monitorexit指令实现的，同步方法（在这看不出来需要看JVM底层实现）依靠的是方法修饰符上的ACC_SYNCHRONIZED实现。他是`悲观锁机制`，是独占锁，当发生竞争阻塞的时候，获取不到锁的线程会频繁的上下文切换带来性能损耗；
     >
     >    而reentrantLock是java的类，是java的api，是底层通过调用unsafe.compareAndSetState，他是使用的`cas乐观锁`的机制，每次不加锁而是假设没有冲突而去完成某项操作，如果因为冲突失败就重试，直到成功为止；[reentrantLock实现详细解释](https://www.jianshu.com/p/b6efbdbdc6fa)
     >
@@ -645,7 +667,7 @@ java基础
 
 17. reentrantLock是如何实现可重入锁的
 
-    >  ReentrantLock 内部自定义了同步器 Sync(Sync 实现了 AQS，而 AOS 提供了一种互斥锁持有的方式)，其实就是 加锁的时候通过 CAS 算法，将线程对象放到一个双向链表中，每次获 取锁的时候，看下当前维护的那个线程 ID 和当前请求的线程 ID 是否 一样，一样就可重入了。
+    >  ReentrantLock 内部自定义了同步器 Sync(Sync 实现了 AQS，而 AOS 提供了一种互斥锁持有的方式)，其实就是 加锁的时候通过 CAS 算法，将线程对象保存起来，每次获 取锁的时候，看下当前维护的那个线程 ID 和当前请求的线程 ID 是否 一样，一样就可重入了，重入次数是state的值；
     >
     > 
 
@@ -684,19 +706,21 @@ java基础
     >
     > [锁膨胀的流程](https://tech.meituan.com/2018/11/15/java-lock.html)
     >
-    > - 无锁状态，cas操作。
+    > - 无锁状态，多个写操作只能通过cas操作。
     >
     > -  对象的偏向锁会偏向于第一个获取它的线程，会在对象头上的 Mark Word 部分设置偏向的线程 ID。接下来如果没有其他线程获取该对象的锁，它一直处于偏向锁状态。通过检测Mark Word里是否存储着指向当前线程的偏向锁，持有偏向锁的线程会不执行同步操作；
     >
     > - [轻量级锁](https://www.cnblogs.com/paddix/p/5405678.html)是指当锁是偏向锁的时候，被另外的线程所访问，偏向锁就会升级为轻量级锁，其他线程会通过自旋的形式尝试获取锁，不会阻塞，从而提高性能。
     >
     >   > - 在代码进入同步块的时候，如果同步对象锁状态为无锁状态（锁标志位为“01”状态，是否为偏向锁为“0”），虚拟机首先将在当前线程的栈帧中建立一个名为锁记录（Lock Record）的空间，用于存储锁对象目前的Mark Word的拷贝，然后拷贝对象头中的Mark Word复制到锁记录中。
-    >   > - 拷贝成功后，虚拟机将使用CAS操作尝试将对象的Mark Word更新为指向Lock Record的指针，并将Lock Record里的owner指针指向对象的Mark Word。
+    >   > - 拷贝成功后，虚拟机将使用CAS操作尝试将对象的Mark Word的ponter指针更新为指向Lock Record的指针，并将Lock Record里的owner指针指向对象的Mark Word。
     >   > - 成功了，那么这个线程就拥有了该对象的锁，并且对象Mark Word的锁标志位设置为“00”，表示此对象处于轻量级锁定状态。
     >   > - 失败了，虚拟机首先会检查对象的Mark Word是否指向当前线程的栈帧，如果是就说明当前线程已经拥有了这个对象的锁，那就可以直接进入同步块继续执行，否则说明多个线程竞争锁。
     >   > - 若当前只有一个等待线程，则该线程通过自旋进行等待。但是当自旋超过一定的次数，或者一个线程在持有锁，一个在自旋，又有第三个来访时，轻量级锁升级为重量级锁。
     >
     > - 重量级锁（10）：编译后的代码块中加入moniterEnter和monitorExist指令，使用monitor对象锁来实现同步阻塞；
+    >
+    > `自适应自旋锁` ： 自适应意味着自旋的时间（次数）不再固定，而是由前一次在同一个锁上的自旋时间及锁的拥有者的状态来决定。如果在同一个锁对象上，自旋等待刚刚成功获得过锁，并且持有锁的线程正在运行中，那么虚拟机就会认为这次自旋也是很有可能再次成功，进而它将允许自旋等待持续相对更长的时间。如果对于某个锁，自旋很少成功获得过，那在以后尝试获取这个锁时将可能省略掉自旋过程，直接阻塞线程，避免浪费处理器资源。
 
 22. [java锁的详细介绍](https://www.cnblogs.com/jyroy/p/11365935.html)  ???
 
@@ -704,7 +728,8 @@ java基础
     >
     > - readWriteLock接口下的ReentrantReadWriteLock： 基于的原理是多个读操作是不需要互斥的，因为读操作并不会更改数据，所以不存在互相干扰。而写操作则会导致并发一致性的问题，所以写线程之间、读写线程之间，需要精心设计的互斥逻辑
     >
-    > - StampedLock：不支持再入性的定义。JDK 在后期引入了 StampedLock，在提供类似读写锁的同时，还支持优化读模式。优化读基于假设，大多数情况下读操作并不会和写操作冲突，其逻辑是先试着读，然后通过 validate 方法确认是否进入了写模式，如果没有进入，就成功避免了开销；如果进入，则尝试获取读锁。
+    >   >  乐观锁、悲观锁、自旋锁、无锁状态、偏向锁、轻量级锁、重量级锁
+    >
 
 23. [CountDownLatch实现原理   ***](https://blog.csdn.net/u014653197/article/details/78217571)
 
@@ -714,7 +739,7 @@ java基础
     >
     > `代码层面`： 使用内部类sync 继承了aqs，① 维护state状态就是countDownLatch的个数；②countDown方法调用的被重写了的tryReleaseShared 使用for(;;)死循环，来判断是否为0；③：await方法调用被重写了的tryAquireShared，判断状态是否为0；
 
-24. countDownLatch和join()方法的区别
+24. countDownLatch和join()方法的区别 ***
 
     >  在当前线程中，如果调用某个thread的join方法，那么当前线程就会被阻塞，直到thread线程执行完毕，当前线程才能继续执行。join的原理是，不断的检查thread是否存活，如果存活，那么让当前线程一直wait，直到thread线程终止，线程的this.notifyAll 就会被调用；
     >
@@ -742,7 +767,7 @@ java基础
 
 28. [Java并发包基石-AQS详解](https://www.cnblogs.com/chengxiao/archive/2017/07/24/7141160.html)   /[AQS 原理以及 AQS 同步组件总结](https://mp.weixin.qq.com/s?__biz=Mzg2OTA0Njk0OA==&mid=2247484832&amp;idx=1&amp;sn=f902febd050eac59d67fc0804d7e1ad5&source=41#wechat_redirect)  ***
 
-    > 1. ` 核心思想`：当被请求的共享资源处于空闲状态，则当前请求资源的线程被标记为有效状态，共享资源被设置为锁定状态。如果被请求的资源被占用，则需要一套线程阻塞等待以及被唤醒时的锁分配的机制，AQS就是使用CLH队列锁来实现的，即将暂时获取不到锁的线程加入到队列中。
+    > 1. ` 核心思想`：当被请求的共享资源处于空闲状态，则当前请求资源的线程被标记为有效状态，共享资源被设置为锁定状态。如果被请求的资源被占用，则需要一套线程阻塞等待以及被唤醒时的锁分配的机制，AQS就是使用CLH队列锁来实现阻塞等待，即将暂时获取不到锁的线程加入到队列中。锁分类就涉及到公平和非公平的分配方式。。
     >
     > 2. `资源共享的方式`：独占和共享，其中独占只有一个线程可以执行，如reentrantLock，又分为公平和非公平的；共享是指多个线程可以同时执行，如countDownLatch/ Semaphore
     >
@@ -769,14 +794,17 @@ java基础
     >
     > > - **ABA问题**
     > > - **循环时间长开销大**,自旋
+    > > - 只能保证一个变量操作的原子性，对于多个共享变量的操作，只能加锁；
 
 31. java内存模型  ***
 
     > 1. java内存模型分为主内存和工作内存，共享变量保存在主内存中，每一个线程需要修改和读取共享变量的时候都要从主内存中copy一份到自己的工作内存中，修改完后会写到主内存中去；
     >
-    > 2. 定义了volatile的使用规则，保证每个线程读取volatile修饰的字段，都可以读取到最新的值，写的值都可以写到主内存中去；
+    > 2. 原子性、可见性、有序性
     >
-    > 3. 定义了原子操作，用于操作主内存和工作内存中的变量；
+    > 3. 定义了volatile的使用规则，保证每个线程读取volatile修饰的字段，都可以读取到最新的值，写的值都可以写到主内存中去；
+    >
+    > 4. 定义了原子操作，用于操作主内存和工作内存中的变量；
     >
     >    ```
     >    lock（锁定主内存）
@@ -789,9 +817,9 @@ java基础
     >    write（把工作内存写入主内存）
     >    ```
     >
-    > 4. 定义了happen-before，即先行发生规则，一个unlock操作一定先行发生于对后面的同一个锁进行lock操作；同一个线程，前面的操作一定先行执行与后面的操作；
+    > 5. 定义了happen-before，即先行发生规则，一个unlock操作一定先行发生于对后面的同一个锁进行lock操作；同一个线程，前面的操作一定先行执行与后面的操作；
     >
-    > 5. 指令重排序，只要和源代码产生的结果一样，编译器会进行操作的重排序，提升计算机性能；
+    > 6. 指令重排序，只要和源代码产生的结果一样，编译器会进行操作的重排序，提升计算机性能；
 
 32. Happens-before 关系
 
@@ -978,7 +1006,7 @@ java基础
 
 8. [hashMap1.8比1.7做了什么优化](https://blog.csdn.net/liSir159633/article/details/105003718) ***
 
-   > 1. 在java 1.8中，如果链表的长度超过了8并且它的hash桶大于等于64的时候，那么链表将转换为红黑树。
+   > 1. 在java 1.8中，如果链表的长度超过了8并且它的hash桶个数大于等于64的时候，那么链表将转换为红黑树。
    >    - 把时间复杂度从O（n）变成O（logN）提高了效率
    > 2. 发生hash碰撞时，java 1.7 会在链表的头部插入，而java 1.8会在链表的尾部插入
    >    - 因为JDK1.7是用单链表进行的纵向延伸，当采用头插法时会容易出现逆序且环形链表死循环问题。但是在JDK1.8之后是因为加入了红黑树使用尾插法，能够避免出现逆序且链表死循环的问题。采用`复制整个链表而不是操作原链的方式` ??
@@ -990,7 +1018,7 @@ java基础
 
 9. 负载因子的作用
 
-   >  负载因子是hash冲突和内存空间利用率的一种折中。
+   >  负载因子是时间和内存空间利用率的一种折中。
    >
    >  若负载因子越大，装载的元素越多，空间利用率高了，但是冲突变大，链表变长，查找效率变低；
    >
@@ -1007,7 +1035,7 @@ java基础
 
 12. [linkHashMap](https://www.imooc.com/article/22931)
 
-    > - linkHashMap是在 HashMap 基础上，通过维护一条双向链表，解决了 HashMap 不能随时保持遍历顺序和插入顺序一致的问题。
+    > - linkedHashMap是在 HashMap 基础上，通过维护一条双向链表，解决了 HashMap 不能随时保持遍历顺序和插入顺序一致的问题。
     >
     > - LinkedHashMap 对访问顺序也提供了相关支持。在一些场景下，该特性很有用，比如缓存。
     >
@@ -1101,7 +1129,7 @@ java基础
     >
     > ConcurrentHashMap的JDK8与JDK7版本的并发实现相比，最大的区别在于JDK8的锁粒度更细，理想情况下talbe数组元素的大小就是其支持并发的最大个数，在JDK7里面最大并发个数就是Segment的个数，默认值是16。
     >
-    > jdk1.8将锁的级别控制在了更细粒度的table元素级别，也就是说只需要锁住这个链表的head节点，并不会影响其他的table元素的读写。缺点是需要等扩容完之后，所有的读写操作才能进行，所以扩容的效率就成为了整个并发的一个瓶颈点，
+    > jdk1.8将锁的级别控制在了更细粒度的table元素级别，也就是说只需要锁住这个链表的head节点，并不会影响其他的table元素的读写。缺点是需要等扩容完之后，所有的读写操作才能进行，所以扩容的效率就成为了整个并发的一个瓶颈点，（1.7是单个HashEntry数组进行扩容）
     >
     > 
     >
@@ -1132,7 +1160,7 @@ java基础
     >
     > `putval方法`
     >
-    > 1. 如果没有初始化就先调用initTable（）方法来进行初始化过程
+    > 1. 如果没有初始化就先调用initTable() 方法来进行初始化过程
     >
     > 2. 如果没有hash冲突就直接CAS插入
     >
@@ -1250,7 +1278,7 @@ java基础
     > - 发现扩容线程已经达到最大扩容线程数
     >
     
-16. [一致性hash算法](https://www.jianshu.com/p/e968c081f563)
+16. [一致性hash算法](https://www.jianshu.com/p/e968c081f563) ***
 
     > `意义`：
     >
@@ -1298,22 +1326,20 @@ java基础
    >
    >   - StackOverFlowError 若 Java 虚拟机栈的大小不允许动态扩展，那么当线程请求栈的深度超过当前 Java 虚拟机栈的最大深度时，抛出 StackOverFlowError 异常。
    >
-   >   - OutOfMemoryError 若允许动态扩展，那么当线程请求栈时内存用完了，无法再动态扩展时，抛出 OutOfMemoryError 异常。`
-   >
-   >     
+   >   - OutOfMemoryError 若允许动态扩展，那么当线程请求栈时内存用完了，无法再动态扩展时，抛出 OutOfMemoryError 异常。
    >
    > - 本地方法栈：和虚拟机栈一样，不过是为虚拟机的native方法服务；
    >
    > - java堆：是线程共享的，是垃圾回收的主要区域；主要包括所有的对象实例、包括数组；
    >
-   > - 方法区：线程共享，虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。也就是老年代；回收目标主要是常量池的回收和类型的卸载。jdk1.8使用metaSpace来代替永久代方法区；
+   > - 方法区：线程共享，虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。也就是永久带；回收目标主要是常量池的回收和类型的卸载。jdk1.8使用metaSpace来代替永久代方法区；
    >
-   >   `JDK 1.8 同 JDK 1.7 比，最大的差别就是：元数据区取代了永久代。元空间的本质和永久代类似，都是对 JVM 规范中方法区的实现。不过元空间与永久代之间最大的区别在于：元数据空间并不在虚拟机中，而是使用本地内存。[metaspace](https://blog.csdn.net/u012834750/article/details/70160594)
+   >   `JDK 1.8 同 JDK 1.7 比`，最大的差别就是：元数据区取代了永久代。元空间的本质和永久代类似，都是对 JVM 规范中方法区的实现。不过元空间与永久代之间最大的区别在于：元数据空间并不在虚拟机中，而是使用本地内存。[metaspace](https://blog.csdn.net/u012834750/article/details/70160594)
    >
-   > - 运行时常量池：是方法区的一部分，运行时的常量池，比如integer的-128-127；1.8中转移到堆中；
+   > - 运行时常量池：是方法区的一部分，运行时的常量池，比如integer的-128-127；`1.8中转移到堆中`；
    >
    > - 直接内存：也叫堆外内存，不是jvm的运行区域的一部分，是java1.4加入的NIO可以使用native方法直接分配堆外内存，Java堆中的DirectByteBuffer对象作为这块内存的引用进行操作。
-
+   
 2. HotSpot虚拟机
 
    - 对象的创建 （对象的初始化、分配内存、把对象指针指向内存区域）  ***
@@ -1481,20 +1507,42 @@ java基础
 
    16. [java类加载过程](https://blog.csdn.net/shuangyue/article/details/9262791) ***
 
-   > 触发类加载：
-   >
-   > - new实例或者调用类的静态变量；
-   > - 初始化子类的时候触发父类初始化
-   > - 使用java.lang.reflect包的方式对类进行反射调用的时候
-   > - 作为程序入口的主类；
-   >
-   > 类加载的过程：
+       [类加载的实例](https://www.cnblogs.com/chanshuyi/p/the_java_class_load_mechamism.html)
+
+       > **对于静态字段，只有直接定义这个字段的类才会被初始化（执行静态代码块）。**因此通过其子类来引用父类中定义的静态字段，只会触发父类的初始化而不会触发子类的初始化。
+
+   > **类加载的过程：**
    >
    > 类加载被分为加载、连接、初始化过程；连接又细分为验证、准备和解析；
    >
-   > 1. 装载：jvm将字节码文件以二进制的方式读入到内存中，解释器转变为机器码，转化为运行时数据结构；
-   > 2. 连接：主要做加载完的准备工作，`验证被加载的文件是否符合java以及jvm规范`；`为类变量分配内存空间和设置初始值的阶段；虚拟机将符号引用替换为直接引用的过程`；
-   > 3. 初始化：根据程序代码去初始化类变量和其他资源；
+   > 1. 装载：jvm将字节码文件以二进制的方式读入到内存中，然后解释器将二进制数据流按照字节码规范解析成jvm内部的运行时数据结构
+   >
+   > 2. 连接：主要做加载完的准备工作；
+   >
+   >    > **验证**：`验证被加载的文件是否符合java以及jvm规范`
+   >    >
+   >    > > 文件格式、元数据、字节码、符号引用的验证；
+   >    >
+   >    > **准备**：`为类变量分配内存空间和设置初始值的阶段`
+   >    >
+   >    > > 在jvm中各类型的初始值如下：int,byte,char,long,float,double 默认初始值为0。如果是final类型的则直接赋值为用户设置的值；
+   >    > >
+   >    > > boolean 为false（在jvm内部用int表示boolean，因此初始值为0）。reference类型为null
+   >    >
+   >    > **解析**：`虚拟机将符号引用替换为直接引用的过程`
+   >    >
+   >    > >  常量池中的类，字段，方法，接口的符号引用，将他们替换成直接引用的过程。
+   >
+   > 3. 初始化：根据程序代码去初始化变量和其他资源；主要是执行类变量的初始化以及执行构造方法。
+   >
+   >    > - new实例或者调用类的静态变量；
+   >    > - 初始化子类的时候触发父类初始化
+   >    > - 使用java.lang.reflect包的方式对类进行反射调用的时候
+   >    > - 作为程序入口的主类；
+   >
+   > 4. 使用
+   >
+   > 5. 卸载
 
 
    17. 两种主动加载方式
@@ -1567,15 +1615,25 @@ java基础
     > - Java 虚拟机栈和本地方法栈，递归调用的时候没有退出条件，由于超过栈的最大深度的时候， StackOverFlowError，如果由于试图去扩展栈空间的的时候失败，则会抛出 OutOfMemoryError。
     > - 永久代：它的大小是有限的，假如我们运行是大量创建动态类，而又没有及时回收。或者项目特别大，需要加载特别多的类，类似intern字符串缓存太多空间也会导致java.lang.OutOfMemoryError: PermGen space；
 
-22. GC的调优思路
+22. [GC的调优思路 ](https://tech.meituan.com/2017/12/29/jvm-optimize.html)
 
-    > - 理解应用需求和问题，确定调优目标。假设，我们开发了一个应用服务，但发现偶尔会出现性能抖动，出现较长的服务停顿。评估用户可接受的响应时间和业务量，将目标简化为，希望 GC 暂停尽量控制在 200ms 以内，并且保证一定标准的吞吐量。
-    > - 掌握 JVM 和 GC 的状态，定位具体的问题，确定真的有 GC 调优的必要。具体有很多方法，比如，通过 jstat 等工具查看 GC 等相关状态，可以开启 GC 日志，或者是利用操作系统提供的诊断工具等。例如，通过追踪 GC 日志，就可以查找是不是 GC 在特定时间发生了长时间的暂停，进而导致了应用响应不及时。
-    > - 这里需要思考，选择的 GC 类型是否符合我们的应用特征，如果是，具体问题表现在哪里，是 Minor GC 过长，还是 Mixed GC 等出现异常停顿情况；如果不是，考虑切换到什么类型，如 CMS 和 G1 都是更侧重于低延迟的 GC 选项。
-    > - 通过分析确定具体调整的参数或者软硬件配置。
-    > - 验证是否达到调优目标，如果达到目标，即可以考虑结束调优；否则，重复完成分析、调整、验证这个过程。
-    > - youngGC 频繁一般是短周期小对象较多，先考虑是不是 Eden 区/新生代设置的太小了，看能否通过调整-Xmn、-XX:SurvivorRatio 等参数设置来解决问题；
-    > - 
+    > - **确定目标**
+    >
+    >   >  理解应用需求和问题，确定调优目标。假设，我们开发了一个应用服务，但发现偶尔会出现性能抖动，出现较长的服务停顿。评估用户可接受的响应时间和业务量，将目标简化为，希望 GC 暂停尽量控制在 200ms 以内，并且保证一定标准的吞吐量。
+    >
+    > - **优化参数**
+    >
+    >   > 掌握 JVM 和 GC 的状态，定位具体的问题，确定真的有 GC 调优的必要。具体有很多方法，比如，通过 jstat 等工具查看 GC 等相关状态，可以开启 GC 日志，或者是利用操作系统提供的诊断工具等。例如，通过追踪 GC 日志，就可以查找是不是 GC 在特定时间发生了长时间的暂停，进而导致了应用响应不及时。
+    >
+    > - **验收结果**
+    >
+    > - 经验
+    >
+    >   > - 这里需要思考，选择的 GC 类型是否符合我们的应用特征，如果是，具体问题表现在哪里，是 Minor GC 过长，还是 Mixed GC 等出现异常停顿情况；如果不是，考虑切换到什么类型，如 CMS 和 G1 都是更侧重于低延迟的 GC 选项。
+    >   > -  youngGC 频繁一般是短周期小对象较多，先考虑是不是 Eden 区/新生代设置的太小了，看能否通过调整-Xmn、-XX:SurvivorRatio 等参数设置来解决问题；
+    >   > - 需要留一台机器进行对比，看优化前后 服务的响应时间和吞吐量是否有得到提升；
+    >   > - 分析具体导致fugcll的原因。
+    >   > - 需要确认项目的架构和代码等已经没有优化空间。要确定目标，吞吐量和响应时间是一个动态平衡的结果；
 
 
 
@@ -1599,7 +1657,7 @@ java基础
   > }
   > ```
   >
-  > 1. 如果第一次检查instance不为null，那就不需要执行下面的加锁和初始化操作。因此，可以大幅降低synchronized带来的性能开销（原先是在getInstance()方法上加synchronized方法）。
+  > 1. 如果第一次检查instance不为null，那就不需要执行下面的加锁和初始化操作。因此，可以大幅降低synchronized带来的性能开销（原先是在getInstance()方法上加synchronized关键字）。
   > 2. 这样似乎很完美，但这是一个错误的优化！在线程执行到第4行，代码读取到instance不为null时，`instance引用的对象可能还没有完成初始化`。
   >
   > - 问题的根源
@@ -1751,12 +1809,12 @@ java基础
    >   在springboot的自动装配过程中，最终会加载META-INF/spring.factories文件，而加载的过程是由SpringFactoriesLoader加载的。从CLASSPATH下的每个Jar包中搜寻所有META-INF/spring.factories配置文件，然后将解析properties文件，找到指定名称的配置后返回。需要注意的是，其实这里不仅仅是会去ClassPath路径下查找，会扫描所有路径下的Jar包，只不过这个文件只会在Classpath下的jar包中。
    >
    
-4. [springboot的启动流程](https://juejin.im/post/6844903669998026759)
+4. [springboot的启动流程](https://juejin.im/post/6844903669998026759)  ***
 
    > **springApplication对象的初始化**
    >
-   > > - 使用 `SpringFactoriesLoader`查找并加载 classpath下 `META-INF/spring.factories`文件中所有可用的 `ApplicationContextInitializer`
-   > > - 使用 `SpringFactoriesLoader`查找并加载 classpath下 `META-INF/spring.factories`文件中的所有可用的 `ApplicationListener`
+   > > - 使用 `SpringFactoriesLoader`查找并加载 classpath下 `META-INF/spring.factories`文件中所有可用的 `ApplicationContextInitializer`  初始化器
+   > > - 使用 `SpringFactoriesLoader`查找并加载 classpath下 `META-INF/spring.factories`文件中的所有可用的 `ApplicationListener`  监听器
    >
    > **Run方法的运行**
    >
@@ -1771,6 +1829,8 @@ java基础
    > - 由 `SpringApplicationRunListener` 来发出 **started 消息**
    > - 完成最终的程序的启动
    > - 由 `SpringApplicationRunListener` 来发出 **running 消息**，告知程序已运行起来了
+   >
+   >  springApplicationRunlistener/environment/初始化applicationContext、setEnvironment到contenx/  refresh完成IOC容器的加载 / 完成程序启动
 
 5. [自定义的springboot stater ***](https://objcoding.com/2018/02/02/Costom-SpringBoot-Starter/)
 
@@ -1818,8 +1878,9 @@ java基础
 2. [springmvc工作原理-源码](https://www.jianshu.com/p/8a20c547e245)
 
    > - 客户端请求提交到DispatcherServlet
-   >
-   > - 由DispatcherServlet控制器查询HandlerMapping，找到并分发到指定的Controller中。
+   > - 由DispatcherServlet控制器查询HandlerMapping，处理器映射器根据请求url找到具体的处理器，生成处理器执行链HandlerExecutionChain(包括处理器对象和处理器拦截器)一并返回给DispatcherServlet。
+   > - DispatcherServlet根据处理器Handler获取处理器适配器HandlerAdapter执行HandlerAdapter处理一系列的操作，如：参数封装，数据格式转换，数据验证等操作
+   > - 执行处理器Controller中。
    > - Controller调用业务逻辑处理后，返回ModelAndView
    > - DispatcherServlet查询一个或多个ViewResoler视图解析器，找到ModelAndView指定的视图
    > - 视图负责将结果显示到客户端
@@ -1932,7 +1993,7 @@ java基础
     > - 目标对象：被代理的目标对象；
     > - 织入：将切面应用到目标对象并导致代理对象创建的过程；
 
-12. [spring实现aop源码](https://juejin.im/post/6844904015843557389)
+12. [spring实现aop源码](https://juejin.im/post/6844904015843557389) ***
 
     > 1. 根据documentReader对象 的parseBeanDefinitions方法解析各种标签解析为beanDefinition。
     >
@@ -2018,7 +2079,6 @@ java基础
 
 18. spring事务相关  ？？？？
 
-    > - 
     > -  事务简介
 
 19. spring是如何实现事务 ***
@@ -2045,33 +2105,100 @@ java基础
 
     >  **spring事务**
     >
-    > - 编程式事务：事务管理代码嵌入到业务方法中来控制事务的提交和回滚。代码冗余，灵活；
-    > - 声明式事务：利用aop原理从代码中将事务管理分离出来。spring不管理事务，他提供了很多事务管理器，接口是（PlatformTransactionManager）。各个平台有自己的实现。
+    >  - 编程式事务：事务管理代码嵌入到业务方法中来控制事务的提交和回滚。代码冗余，灵活；
+    >  - 声明式事务：利用aop原理从代码中将事务管理分离出来。spring不管理事务，他提供了很多事务管理器，接口是（PlatformTransactionManager）。各个平台有自己的实现。
     >
-    > **事务的传播特性**
+    >  **事务的传播特性**
     >
-    >  **REQUIRED 、REQUIRES_NEW。**
+    >  **REQUIRED 、REQUIRES_NEW 、NESTED**
     >
-    > **其它属性**
+    >  >  new 和netsted的区别，前者是两个事务没有联系。后者两个事务有联系（当内部事务回滚，外部事务不会回滚；但外部事务回滚，内部事务也会回滚）。
     >
-    > 回滚属性、超时和只读属性；
+    >  **其它属性**
+    >
+    >  回滚属性、超时和只读属性；
     >
     >  
     >
-    > **关系**
+    >  **关系**
     >
-    > spring事务本质上使用数据库事务，而数据库事务本质上使用数据库锁，所以spring事务本质上使用数据库锁，开启spring事务意味着使用数据库锁；
+    >  spring事务本质上使用数据库事务，而数据库事务本质上使用数据库锁，所以spring事务本质上使用数据库锁，开启spring事务意味着使用数据库锁；
 
-21. spring 事务失效的场景
+21. spring 事务失效的场景 ***
 
     > 1. Transactional注解标注方法修饰符为非public时，@Transactional注解将会不起作用。(非public方法不能被生成代理类)
     > 2. 在类内部调用调用类内部@Transactional标注的方法 。Spring AOP技术使用的是动态代理而自己调用自己的过程，并不存在代理对象的调。
     > 3. 事务方法内部捕捉了异常，没有抛出新的异常，导致事务操作不会进行回滚。
     > 4. 数据库引擎是否支持事务，MySql的引擎MyIsam不支持事务
+    
+22. [spring事务嵌套事务的情况](https://blog.csdn.net/xuanwugang/article/details/81182568) ***
 
+    >  **失效的原因**
+    >
+    > > spring 在扫描bean的时候会扫描方法上是否包含@Transactional注解，如果包含，spring会为这个bean动态地生成一个子类（即代理类，proxy），代理类是继承原来那个bean的。此时，当这个有注解的方法被调用的时候，实际上是由代理类来调用的，代理类在调用之前就会启动transaction。然而，如果这个有注解的方法是被同一个类中的其他方法调用的，那么该方法的调用并没有通过代理类，而是直接通过原来的那个bean，所以就不会启动transaction，我们看到的现象就是@Transactional注解无效。
+    >
+    > **解决办法**
+    >
+    > 1. 使用开启暴露Aop代理到ThreadLocal支持
+    >
+    >    > - <aop:aspectj-autoproxy expose-proxy="true"/>
+    >    >
+    >    >    使用 AopContext.currentProxy()) 获取代理对象；
+    >
+    > 2. 通过初始化方法在目标对象中注入代理对象
+    >
+    >    >  ```java
+    >    > private ApplicationContext context;  
+    >    >       
+    >    >     private AService proxySelf; //②  表示代理对象，不是目标对象  
+    >    >     @PostConstruct  //③ 初始化方法  
+    >    >     private void setSelf() {  
+    >    >         //从上下文获取代理对象（如果通过proxtSelf=this是不对的，this是目标对象）  
+    >    >         //此种方法不适合于prototype Bean，因为每次getBean返回一个新的Bean  
+    >    >         proxySelf = context.getBean(AService.class);   
+    >    >     }  
+    >    >  ```
+    >
+    > 3. 使用beanPostProcesser接口来实现代理对象的注入；
 
+23. [一个事务内动态切换数据源](http://www.linhao007.com/2017/11/23/01/) ***
 
-
-
-
-
+    >  原因 ：
+    >
+    > 	1. AOP可以触发数据源字符串的切换，这个没问题
+    >  	2. 数据源真正切换的关键是 AbstractRoutingDataSource 的 determineCurrentLookupKey()的被调用，此方法是在open connection**时触发
+    >  	3. 事务是在connection层面管理的，启用事务后，一个事务内部的connection是复用的，所以就算AOP切了数据源字符串，但是数据源并不会被真正修改
+    >
+    >  做事务切换进行拦截
+    >
+    > >  使用aop技术对对应的方法做拦截，然后做增强处理，根据对应的注解设置对应的数据源。
+    > >
+    > >  这个是在设置数据源前，获取对应的sqlSessionFactory. 然后获取到sqlsession，通过反射的方式设置新的数据源。
+    > >
+    > >  ```java
+    > > public class DataSourceAdvice implements MethodBeforeAdvice{
+    > > 
+    > >     @Override
+    > >     public void before(Method method, Object[] args, Object target) throws Throwable {
+    > > 
+    > >         javax.sql.DataSource dataSource;
+    > >         if(method.isAnnotationPresent(DataSource.class)){ //如果用了@DataSource注解标注
+    > >             DataSource dataSourceAnn = method.getAnnotation(DataSource.class);
+    > >             String key = dataSourceAnn.value();
+    > >             dataSource = (javax.sql.DataSource)SpringContext.getBean(key);//获取数据源
+    > >         }else{
+    > >             //如果没有标注则默认使用A_DataSource的数据源
+    > >             dataSource = (javax.sql.DataSource)SpringContext.getBean(Constant.DataSourceKey.A_DATASOURCE); //获取数据源
+    > >         }
+    > >         //---------------------修改mybatis的数据源-----------------------
+    > >         //修改MyBatis的数据源
+    > >         SqlSessionFactoryBean sqlSessionFactoryBean = (SqlSessionFactoryBean)SpringContext.getBean(SqlSessionFactoryBean.class);
+    > >         Environment environment = sqlSessionFactoryBean.getObject().getConfiguration().getEnvironment();
+    > >         Field dataSourceField = environment.getClass().getDeclaredField("dataSource");
+    > >         dataSourceField.setAccessible(true);//跳过检查
+    > >         dataSourceField.set(environment,dataSource);//修改mybatis的数据源
+    > >     }
+    > > }
+    > >  ```
+    > >
+    > 

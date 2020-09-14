@@ -16,6 +16,11 @@
    > - 不支持事务；
    > - 使用的是内置函数，不是sql；所以使用node.js操作比较方便；
    > - 和mysql比成熟度相对较低；
+   
+2.  [mongodb为什么使用b树](https://draveness.me/whys-the-design-mongodb-b-tree/)
+
+   > - 作为非关系型的数据库，MongoDB 对于遍历数据的需求没有关系型数据库那么强，它追求的是读写单个记录的性能； 
+   > - 大多数的数据库面对的都是读多写少的场景，B 树与 LSM 树在该场景下有更大的优势；
 
 # mysql
 
@@ -77,44 +82,48 @@
    >   `创建索引`
    >
    >   - where、join、order by、group by、sum、count、in、distinct 字段中创建索引；
-   >   - 频繁变化的字段不适合作为索引，维护索引带来的性能损耗太大；
    >   - 区分度低的不适合创建索引；
+   >   - 频繁修改的表不适宜建立很多索引；
    >
    >   `使用索引`
    >
    >   - 尽量使用覆盖索引；
    >   - 不要对where字段进行表达式计算；
    >   - order by a,b 两个字段都是降序或者升序，否则用不到索引；
-   >   - 联合索引注意最左索引 。
+   >   - 联合索引注意最左索引 ，最左前缀匹配原则，非常重要的原则，mysql会一直向右匹配直到遇到范围查询(>、<、between、like)就停止匹配。
    >   - 不要使用!= <>,可以使用between或者in代替，否则用不到索引；
-   >   - 最左前缀匹配原则，非常重要的原则，mysql会一直向右匹配直到遇到范围查询(>、<、between、like)就停止匹配。
    >   - 长字段索引使用前缀索引；
-   >
-   >   `存储字段的选择`
-   >
-   >   - 尽量使用not null约束，应为null会消耗额外的空间记录它是否为空；
+   >   
+   >`存储字段的选择`
+   >   
+   >- 尽量使用not null约束，应为null会消耗额外的空间记录它是否为空；
    >   - 选择合适的字段类型，比如主键尽量选择自增id，guid比较长，占空间以及太长查找起来比较慢；datetime占用8个字节，而timestamp占用4个字节，只用了一半，而timestamp表示的范围是1970—2037；
    >   - 文件和图片使用文件系统存储，数据库只存储地址；
    >   - 尽量避免使用子查询；
-   >
-   >   `水平和垂直拆分`
-   >
-   >   - 对表记录进行水平拆分分表
+   >   
+   >`水平和垂直拆分`
+   >   
+   >- 对表记录进行水平拆分分表
    >   - 对表字段多的结构进行垂直拆分；
    >   - 批量操作，尽量避免频繁读写
    >   - 数据库尽量使用集群，读写分离；
-
-8. mysql索引失效的情况
+   
+8. mysql索引失效的情况 ***
 
    > 1. 查询条件使用函数在索引列上
    > 2. like "%_" 百分号在前. 
    > 3. or关键字使用
-   > 4. not in ,not exist 不等于等反向操作； 
-   > 5. 单独引用复合索引里非第一位置的索引列. 
-   > 6. 字符型字段为数字时在where条件里不添加引号（隐式转换）. 
-   > 7. 对小表查询；
+   > 4. order by a,b 两个字段都是降序或者升序，否则用不到索引；
+   > 5. not in ,not exist 不等于等反向操作； 
+   > 6. 单独引用复合索引里非第一位置的索引列. 
+   > 7. 字符型字段为数字时在where条件里不添加引号（隐式转换）. 
+   > 8. 对小表查询；
 
-9. [联合索引的使用注意事项](https://blog.csdn.net/b129266314387022/article/details/101648513?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-6.channel_param&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-6.channel_param)
+9. [联合索引的使用注意事项](https://blog.csdn.net/b129266314387022/article/details/101648513?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-6.channel_param&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-6.channel_param)  ***
+
+   [联合索引的例子](https://mp.weixin.qq.com/s?__biz=MzIwMDgzMjc3NA==&mid=2247484811&idx=1&sn=fb702f90cdd86f5139a857b933bf438f&chksm=96f667e2a181eef4443f08cf380b0a02a38a4f08e6ff0faf69df63e6cfac8ca7babddcfac16f&token=239858186&lang=zh_CN#rd) 
+
+   [索引总结](https://zhuanlan.zhihu.com/p/29118331)
 
    >  
    >
@@ -123,8 +132,6 @@
 10. [explain进行sql分析](https://blog.csdn.net/why15732625998/article/details/80388236) ***
 
    > [mysql慢查询 + explain使用](https://blog.csdn.net/wuhuagu_wuhuaguo/article/details/80625124)
-   >
-   > [order by实现原理](https://blog.csdn.net/hguisu/article/details/7161981)
    >
    > - id
    >
@@ -146,7 +153,7 @@
    >   > - ref : 当通过普通的二级索引列与常量进行等值匹配时来查询某个表；
    >   > - index_merge：一般情况下对于某个表的查询只能使用到一个索引，但我们唠叨单表访问方法时特意强调了在某些场景下可以使用`Intersection`、`Union`、`Sort-Union`这三种索引合并的方式来执行查询。`多个索引的顺序io和单个索引的顺序io和回表随机io`；
    >   > - range：只有给定范围内的行才能被检索，使用索引来查询出多行。  `key_len`列表示使用的最长的 key 部分。 这个类型的`ref`列是NULL；
-   >   > - Index：`index`类型和`ALL`类型一样，区别就是`index`类型是扫描的索引树。当我们可以使用索引覆盖，但需要扫描全部的索引记录时，该表的访问方法就是`index` (联合索引中where条件是非前缀索引)
+   >   > - Index：`index`类型和`ALL`类型一样，区别就是`index`类型是`扫描`的索引树。当我们可以使用索引覆盖，但需要扫描全部的索引记录时，该表的访问方法就是`index` (联合索引中where条件是非前缀索引)
    >
    > - key_len
    >
@@ -181,11 +188,43 @@
    > >  指定的二级索引记录，先不着急回表，而是先检测一下该记录是否满足key1 LIKE '%a'这个条件，如果这个条件不满足，则该二级索引记录压根儿就没必要回表
    > >  ```
    > >
-   > >  
    >
-   >   
 
-11. [关于SQL数据库中的范式](https://blog.csdn.net/sinat_35512245/article/details/52923516)
+11. [order by实现原理  ***](https://blog.csdn.net/hguisu/article/details/7161981)
+
+    [order by的优化](https://www.cnblogs.com/songwenjie/p/9418397.html)
+
+    > - 默认使用索引（直接使用索引查询）
+    >
+    >   >  使用联合索引，覆盖索引。
+    >   >
+    >   > 
+    >
+    > - 如果用不到索引则使用会使用sort buffer内存排序，
+    >
+    >   >  1.一次扫描算法
+    >   >
+    >   >  一次性取出满足条件的行的所有字段，然后在排序区sort buffer中排序后直接输出结果集。排序的时候内存开销比较大，但是排序效率比两次扫描算法要高。
+    >   >
+    >   >  
+    >   >
+    >   >  2.两次扫描算法
+    >   >
+    >   >  首先根据条件取出排序字段和行指针信息，之后在排序区sort buffer中排序。这种排序算法需要访问两次数据，第一次获取排序字段和行指针信息，第二次根据行指针获取记录，第二次读取操作可能会导致大量随即I/O操作。优点是排序的时候内存开销较小。
+    >   >
+    >   >  
+    >   >
+    >   >  根据两种排序算法的特性，**适当加大系统变量max_length_for_sort_data的值**，能够让MySQL选择更优化的Filesort排序算法。并且在书写SQL语句时，**只使用需要的字段，而不是SELECT \* 所有的字段**，这样可以减少排序区的使用，提高SQL性能。
+    >   >
+    >   >  
+    >
+    > - 如果还是不够大则使用外部文件排序，归并排序。
+    >
+    > >  内存放不下时，就需要使用外部排序，外部排序一般使用归并排序算法。可以这么简单理解，**MySQL将需要排序的数据分成12份，每一份单独排序后存在这些临时文件中。然后把这12个有序文件再合并成一个有序的大文件。**
+    > >
+    > > 
+
+12. [关于SQL数据库中的范式](https://blog.csdn.net/sinat_35512245/article/details/52923516)
 
    > - 第一范式：强调的是列的原子性，即不能再分成其它几列；
    >
@@ -239,7 +278,17 @@
    >   >  forupdate时候，id为主键，RR策略时候，锁住了的条件符合的行，但是如果条件找不到任何列，锁住的是整个表，
    >   >  ```
 
-11. 如何避免死锁
+11. [死锁的案例](https://blog.51cto.com/14257804/2390505) ***
+
+    > - 批量更新时加锁顺序不一致而导致的死锁；
+    >
+    > - 唯一索引导致的死锁
+    >
+    >   
+    >
+    > 
+
+12. 如何避免死锁
 
     > innodb的行锁是基于索引实现的，未命中所以则会使用表锁；
     >
@@ -247,7 +296,7 @@
     > - 同一个事务一次尽量获取所有需要的锁；
     > - 多个程序以相同的顺序访问表；
 
-12. 处理死锁的思路 [mysql锁机制](https://juejin.im/post/5b82e0196fb9a019f47d1823)
+13. 处理死锁的思路 [mysql锁机制 ](https://juejin.im/post/5b82e0196fb9a019f47d1823) ***
 
     >  ```
     >  第一种方案
@@ -278,7 +327,7 @@
     >  
     >  ```
 
-13. 行锁的优化思路
+14. 行锁的优化思路 ***
 
     >  mysql> show status like 'innodb_row_lock%';
     >
@@ -300,7 +349,7 @@
     >  - 尽可能减少事务的粒度，比如控制事务大小，而从减少锁定资源量和时间长度，从而减少锁的竞争等，提供性能。
     >  - 尽可能低级别事务隔离，隔离级别越高，并发的处理能力越低。
 
-14. **varchar和char 的区别：**
+15. **varchar和char 的区别：**
 
     >  char是一种固定长度的类型，varchar则是一种可变长度的类型，
     >
@@ -308,9 +357,9 @@
     >
     >  在varchar(M)类型的数据列里，每个值只占用刚好够用的字节再加上一个用来记录其长度的字节（即总长度为L+1字节）．
 
-15. [mysql加锁详解系列](https://www.cnblogs.com/crazylqy/p/7611069.html)
+16. [mysql加锁详解系列](https://www.cnblogs.com/crazylqy/p/7611069.html)
 
-16. mysql在rr隔离级别下如何解决幻读 [MySQL的InnoDB的幻读问题](http://blog.sina.com.cn/s/blog_499740cb0100ugs7.html)***
+17. mysql在rr隔离级别下如何解决幻读 [MySQL的InnoDB的幻读问题](http://blog.sina.com.cn/s/blog_499740cb0100ugs7.html)***
 
     > 读是mvcc实现的一致性读（readView）；写是使用行锁加间隙锁来解决的；
     >
@@ -318,19 +367,19 @@
     > - mysql 的重复读解决了幻读的现象，但是需要 加上 select for update/lock in share mode 变成当读避免幻读，普通读select存在幻读(`修改操作默认是加锁的,是当前读`)
     > - Repeatable Read隔离级别下，age列上有一个非唯一索引，对应SQL：delete from t1 where age = 10; 首先，通过id索引定位到第一条满足查询条件的记录，加记录上的X锁在GAP上的GAP锁，然后加主键聚簇索引上的记录X锁，然后返回；然后读取下一条，重复进行。直至进行到第一条不满足条件的记录[11,f]，此时，不需要加记录X锁，但是仍旧需要加GAP锁，最后返回结束。
 
-17. 与mvcc相关的概念
+18. reid与mvcc相关的概念
 
     > - 快照读：简单的select操作，属于快照读。`读取的是记录的可见版本` (有可能是历史版本)，不用加锁。
     > - 当前读：插入/更新/删除操作，属于当前读。`读取的是记录的最新版本`，并且当前读返回的记录，都会加上锁（悲观锁、排它锁），保证其他事务不会再并发修改这条记录。
     > - 在MySQL/InnoDB中，所谓的读不加锁，并不适用于所有的情况，而是隔离级别相关的。Serializable隔离级别，读不加锁就不再成立，所有的读操作，都是当前读。
     > - **在标准的事务隔离级别定义下，REPEATABLE READ是不能防止幻读产生的。INNODB使用了2种技术手段（MVCC AND GAP LOCK)实现了防止幻读的发生。**
 
-18. MVCC的优点
+19. MVCC的优点
 
     > - 多版本并发控制（MVCC）是一种用来解决`读-写冲突`的**无锁并发控制**，也就是为事务分配单向增长的时间戳，为每个修改保存一个版本，版本与事务时间戳关联，`读操作只读该事务开始前的数据库的快照`；
     > - 在并发读写数据库时，可以做到在读操作时不用阻塞写操作，写操作也不用阻塞读操作，提高了数据库并发读写的性能；
 
-19. [mysql是如何实现mvcc的](https://blog.csdn.net/sofia1217/article/details/50778906)  
+20. [mysql是如何实现mvcc的](https://blog.csdn.net/sofia1217/article/details/50778906)  
 
      [mysql的mvcc详细实现](https://blog.csdn.net/SnailMann/article/details/94724197)
 
@@ -349,39 +398,39 @@
     > - 把该行修改前的值copy到undo Log中；
     > - 修改当前行的值，填写事务id，使回滚指针指向undo log中的修改前的行，如果失败就rollback；
     > - 记录redo日志，包括undo log中的变化；
-    >
-    > `插入和删除更简单`:
-    >
-    > insert会产生一条新纪录，将当前事务id插入到事务id字段中；
-    >
-    > 删除操作和更新操作类似，事务id存放当前事务id，将删除标记为设置为删除；
-    >
-    > select操作，可以读取事务id小于当前事务id以及未被删除的记录；
-    >
-    > `如何实现一致性读 —— ReadView`：Read View就是事务进行`快照读`操作的时候生成的`读视图`(Read View)。即生成数据库系统当前的一个快照，记录并维护系统当前活跃事务的ID；
-    >
-    > 1. 如果被访问版本的事务id小于列表中最小的事务id，则证明事务id是之前生成的，所以该版本可以被当前事务访问；
-    >
-    > 2. 如果当前事务id大于id列表中最大的值，则数据不可以被当前事务访问，需要根据undolog日志链表找到前一个版本，根据前一个版本判断可见性。
-    >
-    > 3. 如果在列表中，则证明是活跃的事务id，则需要判断undo Log链的上一个版本，然后在重新计算一次；
+    > 
+    >`插入和删除更简单`:
+    > 
+    >insert会产生一条新纪录，将当前事务id插入到事务id字段中；
+    > 
+    >删除操作和更新操作类似，事务id存放当前事务id，将删除标记为设置为删除；
+    > 
+    >select操作，可以读取事务id小于当前事务id以及未被删除的记录；
+    > 
+    >`如何实现一致性读 —— ReadView`：Read View就是事务进行`快照读`操作的时候生成的`读视图`(Read View)。即生成数据库系统当前的一个快照，记录并维护系统当前活跃事务的ID；
+    > 
+    >1. 如果被访问版本的事务id小于列表中最小的事务id，则证明事务id是之前生成的，所以该版本可以被当前事务访问；
+    > 
+    >2. 如果当前事务id大于id列表中最大的值，则数据不可以被当前事务访问，需要根据undolog日志链表找到前一个版本，根据前一个版本判断可见性。
+    > 
+    >3. 如果在列表中，则证明是活跃的事务id，则需要判断undo Log链的上一个版本，然后在重新计算一次；
     > 4. 判断删除标记位，删除标记要么为空，要么大于当前事务版本号；
-    >
-    > `mvvc的标准实现和innodb的实现区别`
-    >
-    > Innodb的实现真算不上MVCC，因为并没有实现核心的多版本共存，undo log中的内容只是串行化的结果，记录了多个事务的过程，不属于多版本共存。但理想的MVCC是难以实现的，当事务仅修改一行记录使用理想的MVCC模式是没有问题的，可以通过比较版本号进行回滚；但当事务影响到多行数据时，理想的MVCC据无能为力了。理想MVCC难以实现的根本原因在于企图通过乐观锁代替二段提交。修改两行数据，但为了保证其一致性，与修改两个分布式系统中的数据并无区别，而二段提交是目前这种场景保证一致性的唯一手段。`二段提交的本质是锁定，乐观锁的本质是消除锁定`，二者矛盾。
-
-20. RC,RR级别下的InnoDB快照读有什么不同？
+    > 
+    >`mvvc的标准实现和innodb的实现区别`
+    > 
+    >Innodb的实现真算不上MVCC，因为并没有实现核心的多版本共存，undo log中的内容只是串行化的结果，记录了多个事务的过程，不属于多版本共存。但理想的MVCC是难以实现的，当事务仅修改一行记录使用理想的MVCC模式是没有问题的，可以通过比较版本号进行回滚；但当事务影响到多行数据时，理想的MVCC据无能为力了。理想MVCC难以实现的根本原因在于企图通过乐观锁代替二段提交。修改两行数据，但为了保证其一致性，与修改两个分布式系统中的数据并无区别，而二段提交是目前这种场景保证一致性的唯一手段。`二段提交的本质是锁定，乐观锁的本质是消除锁定`，二者矛盾。
+    
+21. RC,RR级别下的InnoDB快照读有什么不同？
 
     > - 在RR级别下的某个事务的对某条记录的第一次快照读会创建一个快照及Read View, 那么之后的快照读使用的都是同一个Read View；
     > - RC级别下的，事务中，每次快照读都会新生成一个快照和Read View, 这就是我们在RC级别下的事务中可以看到别的事务提交的更新的原因；
 
-21. innodb如何实现事务的隔离机制；
+22. innodb如何实现事务的隔离机制；
 
     > 1. 写加读写锁；
     > 2. 读使用一致性快照读，即mvcc；
 
-22. [mysql是如何实现可重复读的 ***](https://juejin.im/post/6844904180440629262)
+23. [mysql是如何实现可重复读的 ***](https://juejin.im/post/6844904180440629262)
 
     > `总结`：
     >
@@ -405,7 +454,7 @@
     >
     > - **InnoDB 就是利用 undo log 和 trx_id 的配合，实现了事务启动瞬间”秒级创建快照“的能力。**
 
-23. [数据库为什么要用B+树结构--MySQL索引结构的实现](https://blog.csdn.net/bigtree_3721/article/details/73650601)、
+24. [数据库为什么要用B+树结构--MySQL索引结构的实现](https://blog.csdn.net/bigtree_3721/article/details/73650601)、
 
     [mysql的索引数的原理解析](https://blog.csdn.net/u013967628/article/details/84305511) ***
 
@@ -426,11 +475,11 @@
     > - 根据局部性原理以及磁盘预读，预读的长度一般为页的整数倍；
     > - 数据库系统巧妙的利用磁盘预读原理，将一个节点的大小设置为一个页，这样每个节点只需要一次IO就可以完全载入，像红黑树这种结构，h明显要深很多。由于逻辑上很近的节点物理上就可能很远，无法利用局部性原理；
 
-24. [B+树的缺点](https://blog.csdn.net/dbanote/article/details/8897599)
+25. [B+树的缺点](https://blog.csdn.net/dbanote/article/details/8897599)
 
     > B+树最大的性能问题是会产生大量的随机IO，随着新数据的插入，叶子节点会慢慢分裂，逻辑上连续的叶子节点在物理上往往不连续，甚至分离的很远，但做范围查询时，会产生大量读随机IO。
 
-25. [分布式id生成器](https://tech.meituan.com/2017/04/21/mt-leaf.html)
+26. [分布式id生成器](https://tech.meituan.com/2017/04/21/mt-leaf.html)
 
     [分布式id生成器简介2](https://mp.weixin.qq.com/s/7RQhCazoLJ-qO7CglZ6b2Q) ***
 
@@ -440,31 +489,33 @@
     > 4. mysql多实例自增主键：每个实例的起始值不同，步长相同；  1+step；2+step；3+step；4+step；`缺点是`:不容易扩容
     > 5. redis生产方案：使用incr原子操作。年月日时分秒+自增id；10万个请求获取id，并发执行完9s左右；`性能一般，占用带宽`
 
-26. mysql的各种日志的（这三种日志是顺序IO）***
+27. mysql的各种日志的（这三种日志是顺序IO）***
 
     > - Redo log（重做日志）：事务开始之后就产生redo log，redo log的落盘并不是随着事务的提交才写入的，而是在事务的执行过程中，便开始写入redo log文件中。确保事务的持久性。`防止在发生故障的时间点，尚有脏页未写入磁盘，在重启mysql服务的时候，根据redo log进行重做`，从而达到事务的持久性这一特性。
     > - Undo log(回滚日志)：保存了事务发生之前的数据的一个版本，可以用于回滚，同时可以提供多版本并发控制下的读（MVCC），也即非锁定读。
     > - **二进制日志（binlog）**：
     >   1. 用于复制，在主从复制中，从库利用主库上的binlog进行重播，实现主从同步。
-    >   2. 用于数据库的基于时间点的还原
+    >   2. 用于数据库的基于时间点的还原。冷备
 
-27. mysql主从同步流程 ***
+28. mysql主从同步流程 ***
 
-    > - master将操作语句记录到binlog日志中，然后授予slave远程连接的权限（master一定要开启binlog二进制日志功能；通常为了数据安全考虑，slave也开启binlog功能）。
-    > - slave开启两个线程：IO线程和SQL线程。其中：IO线程负责读取master的binlog内容到中继日志relay log里；SQL线程负责从relay log日志里读出binlog内容，并更新到slave的数据库里。
-    > - 日志格式：statement level记录操作语句, row level记录操作涉及的所有行数据, mixed level;
+    > - 在备库B上通过change master命令，设置主库A的IP、端口、用户名、密码，以及要从哪个位置开始请求binlog，这个位 置包含文件名和日志偏移量。
+    > - 在备库B上执行start slave命令，这时候备库会启动两个线程，就是图中的io_thread和sql_thread。其中io_thread负责与 主库建立连接。
+    > - 主库A校验完用户名、密码后，开始按照备库B传过来的位置，从本地读取binlog，发给B。
+    > - 备库B拿到binlog后，写到本地文件，称为中转日志(relay log)。
+    > - sql_thread读取中转日志，解析出日志里的命令，并执行。
 
-28. 给大表加索引
+29. 给大表加索引、添加字段 ***
 
-    > ① 创建一个临时的新表，首先复制旧表的结构（包含索引）
+    > ① 创建一个临时的新表，首先复制旧表的结构（包含索引）；
     >
-    > ② 给新表加上新增的字段
+    > ② 给新表加上新增的字段；
     >
     > ③ 把旧表的数据复制过来 (limit 分多次复制)，需要把这期间的数据存储下来；
     >
-    > ④ 删除旧表，重命名新表的名字为旧表的名字
+    > ④ 删除旧表，重命名新表的名字为旧表的名字；
 
-29. [深度分页的优化](https://blog.csdn.net/ydyang1126/article/details/72885246)
+30. [深度分页的优化](https://blog.csdn.net/ydyang1126/article/details/72885246)
 
     >  核心思想是缩小limit m,n的范围。
     >
@@ -474,7 +525,7 @@
     >
     >    原理还是一样，**记录住当前页id的最大值和最小值，计算跳转页面和当前页相对偏移**，由于页面相近，这个偏移量不会很大，这样的话m值相对较小，大大减少扫描的行数。
 
-30. [mysql，未分库之后进行分库，具体的方案](https://github.com/doocs/advanced-java/blob/master/docs/high-concurrency/database-shard-method.md)
+31. [mysql，未分库之后进行分库，具体的方案](https://github.com/doocs/advanced-java/blob/master/docs/high-concurrency/database-shard-method.md)
 
     > 1. 场景，数据库的数据量单表达到2000万，db的磁盘不够用，又无法升级磁盘，所以需要使用新机器进行分400张表扩容分表；
     > 2. 首先，将库里的其它表的数据从旧db导入到新db，自己使用定时任务将数据重新rehash到新的400张表中。需要对比某个时间点，新旧两个库里的数据量是否一致。
@@ -1032,29 +1083,6 @@
   >   - 订单产生后发货的数据，产生Redis list，通过消息队列处理
   >   - 秒杀结束后，再把Redis数据和数据库进行同步
 
-- redis如何实现高可用 
-
-  > 1. 主从复制：数据备份、读写分离、分布式集群；
-  >
-  >    - 主从复制的全量同步，从库启动后，会向主库发送sync命令；
-  >    - 主库会在后台生产rdb文件后发送给从库；从库丢弃旧数据进行载入；
-  >    - 主库发送rdb文件后将写命令同时放入缓冲区中；
-  >    - 从服务器载入完毕后同时接收来自主服务器的缓冲区的命令；
-  >    - 新版复制采用PSYNC命令，具有完整重同步和部分重同步2种操作。主从服务器都会维护一个复制偏移量。
-  >    - slaveof 10.211.55.9 6379
-  >
-  > 2. 哨兵模式：
-  >
-  >    - 使用sentinal哨兵集群管理多个redis；
-  >    - 监控(Monitoring)：哨兵(sentinel) 会不断地检查你的Master和Slave是否运作正常。
-  >    - 提醒(Notification)：当被监控的某个Redis出现问题时, 哨兵(sentinel) 会发出通知
-  >    - 自动故障迁移(Automatic failover)：当一个Master不能正常工作时，哨兵(sentinel) 会开始一次自动故障迁移操作，它会将失效Master的其中一个Slave升级为新的Master， 并让失效Master的其他Slave改为复制新的Master；当客户端试图连接失效的Master时，集群也会向客户端返回新Master的地址,使得集群可以使用Master代替失效Master。
-  >
-  > 3. cluster模式：
-  >    - redis cluster在设计的时候，就考虑到了去中心化，去中间件，加入一个节点就可以获取其它节点；
-  >    - Redis 集群**没有使用传统的一致性哈希**来分配数据，而是采用另外一种叫做**哈希槽** (hash slot)的方式来分配的。redis cluster 默认分配了 16384个槽位 ；
-  >    - 为了提高高可用，加入了主从模式；
-
 - [redis的sentinel进行failover流程](https://www.cnblogs.com/ivictor/p/9755065.html)  ***
 
   > - 每隔1秒，每个Sentinel节点会向主节点、从节点、其余Sentinel节点发送一条ping命令做一次心跳检测，来确认这些节点当前是否可达。当这些节点超过down-after-milliseconds（default  30s）没有进行有效回复，Sentinel节点就会判定该节点为主观下线。
@@ -1148,7 +1176,7 @@
 
 - redis实现异步队列 ***
 
-  >  使用 list 类型保存数据信息，rpush 生产消息，lpop 消费消息，当 lpop 没有消息时，可以使用 blpop, 在没有信息的时候，会一直阻塞，直到信息的到来。
+  >  使用 list 类型保存数据信息，rpush 生产消息，lpush 消费消息，当 rpop 没有消息时，可以使用 brpop, 在没有信息的时候，会一直阻塞，直到信息的到来。
   >
   >  redis 可以通过 pub/sub 主题订阅模式实现 一个生产者，多个消费者，当然也存在一定的缺点，当消费者下线时，生产的消息会丢 失。
 
@@ -1443,9 +1471,20 @@
    > `顺序读写、零拷贝机制、分区、批量发送、数据压缩`
    >
    > - 计算机组成（划重点）里我们学过，硬盘是机械结构，需要指针寻址找到存储数据的位置，所以，如果是随机IO，磁盘会进行频繁的寻址，导致写入速度下降。Kafka使用了顺序IO（`指的是本次 I/O 给出的初始扇区地址和上一次 I/O 的结束扇区地址是完全连续或者相隔不多的。反之，如果相差很大，则算作一次随机 I/O。`）提高了磁盘的写入速度，Kafka会将数据顺序插入到文件末尾，避免了随机读写磁盘导致的性能瓶颈。有测试证明多个分区顺序写磁盘的总效率要比随机写内存还要高。顺序结构的存储对于即使数以TB的消息存储也能够保持长时间的稳定性能。[kafka高性能的读写消息](https://www.jianshu.com/p/650c9878dee7)
-   > - “零拷贝(zero-copy)”系统调用机制，就是跳过“用户缓冲区”的拷贝，建立一个磁盘空间到内存的直接映射，数据不再复制到“用户态缓冲区”，省去了一步比较耗时的工作；Memory Mapped Files
-   > - kafka中的topic中的内容可以被分为多分partition存在,每个partition又分为多个segment段，所以每次操作都是针对一小部分做操作，很轻便，并且增加并行操作的能力；生产上并发写，消费上多个消费者进消费，提高并发能力；
+   >
+   > - “零拷贝(zero-copy)”系统调用机制，就是跳过“用户缓冲区”的拷贝，建立一个磁盘空间到内存的直接映射，数据不再复制到“用户态缓冲区”，省去了一步比较耗时的工作；
+   >
+   >   kafka使用sendfile系统，具体为Java的senfile系统调用API: FileChannel的transferTo, transferFrom
+   >    ，基于MMAP机制实现了磁盘文件内容的零拷贝传输。 `传统IO：硬盘->内核页缓存->用户空间缓存->内核socket缓冲区->网卡硬件缓存`
+   >
+   > - 异步刷盘  ，只是写入到pageCache中，由操作系统进行flush。或者可以在kafka中配置参数进行fsync
+   >
+   >   [同步和异步刷盘](https://blog.csdn.net/u014630623/article/details/88992570)
+   >
+   > - kafka中的topic中的内容可以被分为多分partition存在,每个partition又分为多个segment段，所以每次操作都是针对一小部分做操作，很轻便，并且增加并行操作的能力；生产上并发写，消费上多个消费者进消费，提高并发能力；[同时往多个partition中写消息](https://www.cnblogs.com/monkeyteng/p/10221291.html)
+   >
    > - kafka允许进行批量发送消息，producter发送消息的时候，可以将消息缓存在本地，等到了固定条件发送到kafka；
+   >
    > - Kafka还支持对消息集合进行压缩，Producer可以通过GZIP或Snappy格式对消息集合进行压缩压缩的好处就是减少传输的数据量，减轻对网络传输的压力；
 
 3. 应用场景
@@ -1462,11 +1501,17 @@
 5. [kafka如何保证消息不丢失  ***](https://blog.csdn.net/u010627840/article/details/76435385)
 
    >1. 在 producer 端设置 `retries=MAX`，失败后无限重试。由于kafka采用至少一次的机制，保证消息不丢失，有可能重复；
-   >2. broker端设置ack=all，各个follower都同步完消息才算成功；
+   >
+   >2. broker端设置ack=all，各个partition的follower都同步完消息才算成功；同步复制机制
+   >
    >3. consumer端采用手动提交commit日志的机制，只有自己手动处理成功，才提交commit日志；
    >
-   > - 落库的数据使用唯一索引的方式保证数据不重复；
-   > - 业务处理逻辑中，将唯一键存储在redis中，消费之前判断是否存在，如果存在则不处理；如果不存在则在处理然后放入redis中；
+   >   > - 落库的数据使用唯一索引的方式保证数据不重复；
+   >   >
+   >   > - 业务处理逻辑中，将唯一键存储在redis中，消费之前判断是否存在，如果存在则不处理；如果不存在则在处理然后放入redis中
+   >
+   >4. 多副本同步复制机制可以保证消息不丢失，还可以使用同步刷盘机制（配置刷盘频率以及刷盘消息数）
+   >
 
 6. kafka是如何实现高可用的
 
@@ -1474,6 +1519,7 @@
    > - 支持副本机制，topic支持多个partition，每个partition可以在不同的broker上有副本；支持leader选举；假如leader宕机，则可以选举follower担任主节点；
    > - 支持生产者写数据的ack机制；
    > - 消费只会从leader读取，只有所有的follower都被ack了才会被读取到；
+   > - 消费者实例挂掉，可以进行rebalance。
 
 7. 大量的消息积压了几个小时还没解决 ***
 
@@ -1499,13 +1545,16 @@
     >- 能不能`支持数据 0`丢失 啊？可以的，参考我们之前说的那个 kafka 数据零丢失方案。
     >- 支持消息的有序应，参考partition；
 
-11. [kafka和rocketMq的区别 ***](https://www.cnblogs.com/eryun/p/12088253.html)
+11. [kafka和rocketMq的区别 ***](https://blog.csdn.net/qq_27529917/article/details/88205400)
 
     > - 吞吐量：kafka是百万级别的，rocketmq是十万级别的；
-    > - 服务治理：kafka使用的是zookeeper做服务发现和治理治理，broker和consumer都会向其注册自身的信息，当有broker或者consumer有宕机的时候会立刻感知（利用zookeeper的监听机制），做相应的调整；rocketMq使用自定义的nameServer做服务发现和治理，实时性差点，比如broker宕机，producer和consumer都不能立刻感知，只有下次更新broker集群的时候才能做调整（轮训机制），但数据不会丢失；
+    > - 服务治理：kafka使用的是zookeeper做服务发现和治理治理，broker和consumer都会向其注册自身的信息，当有broker或者consumer有宕机的时候会立刻感知（利用zookeeper的监听机制），做相应的调整；rocketMq使用自定义的nameServer做服务发现和治理，实时性差点，比如broker宕机，producer和consumer都不能立刻感知，只有下次更新broker集群的时候才能做调整（轮询机制），但数据不会丢失；
     > - 消息查询和延迟队列：rocketmq支持根据offset查询，还支持自定义的key查询；支持延迟队列，rocketmq针对每个topic都有延迟队列，当消费失败后会将消息存入延迟队列中，每个消费者启动的时候回自动订阅延迟队列；
     > - 消息的落盘机制机制：kafka的每个toic下的每个分区的每个segment对应一个物理文件，分散落盘；roketmq的消息是一个物理文件，每个topic的每个分区只是逻辑上的分区，顺序落盘；
-    > - 发送方式：kafka默认使用异步批量发送的形式，有一个memory buffer暂存消息，同时会将多个消息整合成一个数据包发送，这样能提高吞吐量，但对消息的实效有些影响；rocketmq可选择使用同步或者异步发送；
+    > - 发送方式：kafka默认使用异步批量发送的机制，有一个memory buffer暂存消息，同时会将多个消息整合成一个数据包发送，这样能提高吞吐量，但对消息的实效有些影响；rocketmq可选择使用同步或者异步发送；
+    > - 发送响应：kafka的复制的ack可以配置，rocketMq则是必须ack；
+    > - 刷盘策略：kafka是异步刷盘，rocketMq支持同步和异步刷盘。
+    > - 事务的支持：kafka不支持分布式事务，rocketmq支持半消息的分布式事务；
 
 12. 消息队列的对比
 
@@ -1597,7 +1646,7 @@
 > - TNonblockingServer：多线程服务模型，使用非阻塞式IO（需使用TFramedTransport数据传输方式）
 > - THsHaServer，YHsHa引入了线程池去处理（需要使用TFramedTransport数据传输方式），其模型把读写任务放到线程池去处理；
 
-- [rest与rpc的区别](https://baijiahao.baidu.com/s?id=1617168792520937104&wfr=spider&for=pc)
+- [rest与rpc的区别  ***](https://baijiahao.baidu.com/s?id=1617168792520937104&wfr=spider&for=pc)
 
   >  rest是一种`架构风格`，指满足一些约束条件和原则的程序就是restful，它并没有创造新的技术、组件或服务。`它把所有的内容视为资源`。`通过http协议处理数据的通信`，包括资源的增删改查。
   >
@@ -1630,7 +1679,7 @@
 > 2. 节约了有限的IP地址资源，企业内所有的网站共享一个在internet中注册的IP地址，这些服务器分配私有地址，采用虚拟主机的方式对外提供服务。
 > 3. 减少WEB服务器压力，提高响应速度；
 
-# zookeeper ***
+#  [zookeeper](https://juejin.im/post/6867314531841146893) ***
 
 - [zookeeper简介](https://www.cnblogs.com/wangyayun/p/6811734.html)
 
@@ -1724,6 +1773,33 @@
   > - zookeeper与生俱来的服务容错容灾能力，可以确保服务注册表的高可用；
 
 - [zookeeper实现分布式配置文件](https://www.cnblogs.com/leeSmall/p/9614601.html)
+
+- zookeeper的watcher实现原理 ***
+
+  > - ZooKeeper的Watcher机制主要包括客户端线程、客户端 WatcherManager、Zookeeper服务器三部分。
+  > - 客户端向ZooKeeper服务器注册Watcher的同时，会将Watcher对象存储在客户端的WatchManager中。
+  > - 当zookeeper服务器触发watcher事件后，会向客户端发送通知， 客户端线程从 WatcherManager 中取出对应的 Watcher 对象来执行回调逻辑。
+  >
+  >  
+  >
+  > **一次性：**一个Watch事件是一个一次性的触发器。一次性触发，客户端只会收到一次这样的信息。
+  >
+  > **异步的:**    Zookeeper服务器发送watcher的通知事件到客户端是异步的，不能期望能够监控到节点每次的变化，Zookeeper只能保证最终的一致性，而无法保证强一致性。
+  >
+  > **轻量级：** Watcher 通知非常简单，它只是通知发生了事件，而不会传递事件对象内容。
+  >
+  > **客户端串行：** 执行客户端 Watcher 回调的过程是一个串行同步的过程。
+  >
+  > 注册 watcher用getData、exists、getChildren方法
+  >
+  > 触发 watcher用create、delete、setData方法
+
+- zookeeper的顺序一致性 ***
+
+  >  zk专门设计了zab（zookeeper atomic broadcast）协议作为其数据一致性协议。利用zab协议的数据写入由leader节点协调，使用两节点提交达到数据的最终一致性。
+  >
+  > - 每次的数据写入事件作为提案广播给所有follower节点，可以写入的节点返回确认消息ack；
+  > - leader收到一般以上的ack消息后确认可以写入生效，向所有节点广播commit将提案生效。
 
 # linux服务器？
 
@@ -1875,7 +1951,7 @@
    > - cap模型的支持：zookeeper保证的是cap定理中的cp，它的集群模式模式是主从模式，在一个时间点只有一个leader真正的对外提供服务，其它follower负责冗余备份；而eureka保证的事cap中的ap，它的分布式模式是无主模式，他所有节点都是平等的，客户端访问的任一节点都可以对应的提供服务。如果某个节点发送故障停机，其请求会交给其它节点来实现，它很难保证各个节点数据的实时一致性。通过各节点时候实时同步，保证的是最终一致性；
    > - 是否支持数据存储：szookeeper支持数据存储，可以作为配置中心；eureka不支持数据存储；
    > - 客户端的变化监听：zookeeper支持订阅监听来实现，eureka通过轮训的方式来实现；
-   > - 集群监控：eureka支持metrics（运维可以手机并报警这些度量信息达到监控），zookeeper不支持；
+   > - 集群监控：eureka支持metrics（运维可以收集并报警这些度量信息达到监控），zookeeper不支持；
 
 
 # vertx
@@ -1980,7 +2056,7 @@
 
 
 
-
+[高开试题](https://github.com/doocs/advanced-java)
 
 - 什么是CAP定理？
 - 说说CAP理论和BASE理论？
