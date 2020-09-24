@@ -185,7 +185,7 @@ tcp/ip协议详解
 >     撤销选择
 > ```
 >
-> 
+> https://leetcode-cn.com/problems/subsets/solution/hui-su-suan-fa-by-powcai-5/
 
 
 
@@ -313,11 +313,15 @@ tcp/ip协议详解
 >          }
 >  ```
 
+#### 单调队列
 
+> 「单调队列」的核心思路和「单调栈」类似。单调队列的 push 方法依然在队尾添加元素，但是要把前面比新元素小的元素都删掉：
+>
+>  [239. 滑动窗口最大值](https://leetcode-cn.com/problems/sliding-window-maximum/)
 
 #### 双指针
 
->  
+>  [283. 移动零](https://leetcode-cn.com/problems/move-zeroes/) 双指针
 >
 > 
 

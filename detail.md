@@ -44,13 +44,13 @@
 
 - **如何使用aop实现读写分离**
 
-  > - 使用annotation定义标识数据源的注解； write/read/other
+  > - 使用annotation定义标识数据源dataSource注解； write/read/other
   >
   > - 定义切面，切入点在service实现层的。 前置增强通过反射获取到对应的读注解和写注解到ThreadLocal里、后置增强从ThreadLocal清除对应的数据源；我们使用threadLocal以及linkedList持有线程的数据源副本；
   >
   > -  继承spring的 AbstractRoutingDataSource，**实现动态数源**。**determineCurrentLookupKey**方法从ThreadLocal里获取对应注解的数据源
 
-- 如何定位cpu负载过高的问题
+- 如何定位cpu负载过高的问题  https://www.cnblogs.com/dennyzhangdd/p/11585971.html
 
   > 1. 使用top查看进程 
   >
@@ -101,25 +101,64 @@
 
 - redis获取不到连接
 
+  > 
+  >
+  > 1. 晚高峰的时候运营反馈讲师反馈有学员获取试卷接口和交卷失败；
+  >
+  > 2. 首先查看线上日志，提示相关接口是空指针异常，获取不到试卷信息和答题记录信息，爆出的异常是 jedisConnectionException could not get a resource from pool。
+  >
+  > 3. 连接到redis服务器， info clients，获取服务器的当前连接数，此时的连接数是 3000多，而平时的是500左右；（线上的maxConnect 是600 ）
+  >
+  > 4. 使用slowLog get 查询，显示有好多慢日志（慢日志是超过20ms的），各种key的都有。毕竟是服务器压力比较大，而且看了下这些 object debug key 查看的也不是很大。所以这些key不一定是真凶；
+  >
+  > 5. 猜测是redis的大key导致的，然后使用 bgsave，使用redis-rdb-tool 分析成csv文件（处理了一个分片上的，且数据量太大）导入mysql  查询出来一些大key。 python写的程序
+  >
+  >    > - KNOWLEDGE_TREE_BY_CONDITION   。知识树的使用一个hashMap来处理，这个大key达到了50M，主要是多个知识树。最大的是1M，但是知识树有192个；`拆分、压缩`；
+  >    > -  STUDY_REPORT:RANK_SCORE:70 。`对数量走限制（2万个）毕竟超过128个 会转化为跳表；`
+  >    > -   T_TIKU_USER_RECORD_MAP:STU_ID2414629  
+  >    > -  ORDER_LIFE_CYCLE  
+  >    > -  APP_EXAM_PAPER_27388  本身很大的 使用gdk自带的gzip做了压缩；
+  >    > -  tiku_server:rank:paper_id#157294
+  >
+  > 6. 自己写程序  跑定时任务  https://blog.csdn.net/qq_36530221/article/details/104950721 
+  >
+  >    scan  sleep 10s
+  >
+  >    object debug key   
+  >
+  >    ```java
+  >    172.16.100.64:9736[7]> debug object LAST_DO_SYNC_FAILURE:LAST_DO_SYNC_FAILURE_NEW_TIKU_10375562_3145947
+  >    Value at:0x7fa31bbb2600 refcount:1 encoding:raw serializedlength:796 lru:5484175 lru_seconds_idle:1281166
+  >    ```
+  >
+  >    通过邮件进行通知；
+  >
+  > 7. 通过redis manager的一个工具，可以监听redis的客户端连接数，redis的qps；超过指定的阈值进行报警；
+  >
+  >    连接数的阈值是 1500 ； qps的阈值是  30000；
+  >
+  > 
+  >
   > 突然报警，提示redis获取不到连接。 jedisConnectionException could not get a resource from pool
   >
   > ```java
-  >172.16.100.64:9736> info clients
+  > 172.16.100.64:9736> info clients
   > # Clients
   > connected_clients:3115
   > client_longest_output_list:0
   > client_biggest_input_buf:0
   > blocked_clients:0
+  >   
   > 172.16.100.64:9736> config get maxclients
   > 1) "maxclients"
   > 2) "10000"
   > 
   > ```
-  > 
+  >
   > 查看redis的连接池的参数设置
   >
   > ```
-  >jedipool连接池配置推荐的设置（适合v2.5+版本，咨询了用户团队的开发人员）：
+  > jedipool连接池配置推荐的设置（适合v2.5+版本，咨询了用户团队的开发人员）：
   > // 设置最小空闲连接数或者说初始化连接数
   > config.setMinIdle(10);
   > // 设置最大空闲连接数，（根据并发请求合理设置）
@@ -131,7 +170,7 @@
   > // 设置最大等待时间
   > config.setMaxWaitMillis(500);
   > ```
-  > 
+  >
   > 想到最近上线的需求是什么？
   >
   > 原来最近上线的功能需要是一个试卷的内容的存储，试卷大部分都比较大 从十几k到300多k。试卷内容中新加了一个试卷的答题人数的功能，然后他在每次交卷的时候去获取这个试卷的内容然后增加他的答题人数。这样当并发上来的时候根据redis的单线程模型，当并发量上来的时候，好多连接都在处理获取大key，计算后set大key，这样大部分时间处理器都用在处理redis的value的网络IO上。所以连接被占用，当并发量越大，连接数用的越多的时候，这种情况越明显；
@@ -141,7 +180,7 @@
   >   使用jdk提供的gzip工具对value进行压缩，压缩80%。
   >
   >   对这种试卷答题人数的计算使用 incr命令，分开统计；
-  
+
 - 解决主从同步延迟的问题；
 
   > 运营群反馈获取结果页接口异常。具体场景是这样。刚交完卷获取结果页异常，再重新退出，点进去可以获取到解结果页；这种问题尤其在晚上下课就是高峰的时候尤为明显。
@@ -169,20 +208,19 @@
   >
   > ```
   > 1. 先写到内存中，此时不可搜索
-  > 2. 默认经过 1s 之后会被写入 lucene 的底层文件 segment 中 ，此时可以搜索到
-  > 3. refresh 之后才会写入磁盘
+  > 2. 默认经过 1s 之后进行 refresh 会被写入 lucene 的底层文件 segment 中 ，此时可以搜索到
   > ```
-  >
-  > 了解到它这种保证强刷盘特性 setRefresh，是每次index数据的时候强制刷新，这种可以实现。而且压测的时候是单个接口压测的，测试环境的压800 都是在100毫秒内 没问题；
-  >
-  > 开始是没问题的。
-  >
-  > 当流量上来后，查询排行榜的接口特别慢，查询日志发现是查询es的时候特别慢，猜测是es的setRefresh影响；
-  >
-  > 实时更新不能缓存，数据量大；
-  >
-  > 后来改为redis查询，正常放到缓存中，每次入库放入到redis的zset结构中，key是paperId，score是答分数减去答题用时值；
-  >
+  > 
+  >了解到它这种保证强刷盘特性 setRefresh，是每次index数据的时候强制刷新，这种可以实现。而且压测的时候是单个接口压测的，测试环境的压800 都是在100毫秒内 没问题；
+  > 
+  >开始是没问题的。
+  > 
+  >当流量上来后，查询排行榜的接口特别慢，查询日志发现是查询es的时候特别慢，猜测是es的setRefresh影响；
+  > 
+  >实时更新不能缓存，数据量大；
+  > 
+  >后来改为redis查询，正常放到缓存中，每次入库放入到redis的zset结构中，key是paperId，score是答分数减去答题用时值；
+  > 
   
 - 消息堆积的处理
 
@@ -320,7 +358,7 @@ B端的服务主要包括讲师、教研工作台等；主要给讲师使用的�
 
 使用es 完成了日志数据的存储；
 
-用nginx做反向代理
+用nginx做反向代理  lvs 做负载 
 
 **3. 用户缓存项目**
 

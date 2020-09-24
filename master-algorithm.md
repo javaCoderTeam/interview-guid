@@ -26,9 +26,9 @@
 
 8. #### [27. 移除元素](https://leetcode-cn.com/problems/remove-element/)
 
-3. #### [34. 在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
+3. #### [34. 在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/) ***
 
-4. #### [56. 合并区间](https://leetcode-cn.com/problems/merge-intervals/)
+4. #### [56. 合并区间](https://leetcode-cn.com/problems/merge-intervals/) ***
 
 5. #### [238. 除自身以外数组的乘积](https://leetcode-cn.com/problems/product-of-array-except-self/)
 
@@ -54,7 +54,7 @@
 
 7. #### [24. 两两交换链表中的节点](https://leetcode-cn.com/problems/swap-nodes-in-pairs/) ***
 
-8. [92. 反转链表 II](https://leetcode-cn.com/problems/reverse-linked-list-ii/)
+8. [92. 反转链表 II](https://leetcode-cn.com/problems/reverse-linked-list-ii/) ***
 
 9. ####  [160 相交链表](https://leetcode-cn.com/problems/intersection-of-two-linked-lists/) ***
 
@@ -108,7 +108,7 @@
 
 5. #### [5. 最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/) 
 
-6. [415. 字符串相加](https://leetcode-cn.com/problems/add-strings/)
+6. [415. 字符串相加](https://leetcode-cn.com/problems/add-strings/) ***
 
 
 
@@ -210,31 +210,41 @@
 
 # 动态规划 
 
-2. 0-1背包问题  /dynamicprogramming/ZeroOndBag3    
+2.   [416. 分割等和子集](https://leetcode-cn.com/problems/partition-equal-subset-sum/)                        0-1背包问题  /dynamicprogramming/ZeroOndBag3  
 
-3. #### [70. 爬楼梯](https://leetcode-cn.com/problems/climbing-stairs/)  ***
+3. #### [474. 一和零](https://leetcode-cn.com/problems/ones-and-zeroes/)
 
-4. #### [120. 三角形最小路径和](https://leetcode-cn.com/problems/triangle/) ***
+4. #### [494. 目标和](https://leetcode-cn.com/problems/target-sum/)
 
-5. #### [152. 乘积最大子数组](https://leetcode-cn.com/problems/maximum-product-subarray/)***
+5. [322. 零钱兑换](https://leetcode-cn.com/problems/coin-change/) ***
 
-6. 121、122、123、309、188、714  **股票买卖系列**  ***
+6. #### [518. 零钱兑换 II](https://leetcode-cn.com/problems/coin-change-2/)
 
-7. #### [300. 最长上升子序列](https://leetcode-cn.com/problems/longest-increasing-subsequence/) ***
+8. #### [70. 爬楼梯](https://leetcode-cn.com/problems/climbing-stairs/)  ***
 
-8. [198. 打家劫舍](https://leetcode-cn.com/problems/house-robber/) ***
+9. #### [120. 三角形最小路径和](https://leetcode-cn.com/problems/triangle/) ***
 
-9. #### [322. 零钱兑换](https://leetcode-cn.com/problems/coin-change/) ***
+10. #### [152. 乘积最大子数组](https://leetcode-cn.com/problems/maximum-product-subarray/)***
 
-11. #### [53. 最大子序和](https://leetcode-cn.com/problems/maximum-subarray/) ***
+11. 121、122、123、309、188、714  **股票买卖系列**  ***
 
-12. #### [64. 最小路径和](https://leetcode-cn.com/problems/minimum-path-sum/) ***
+12. #### [300. 最长上升子序列](https://leetcode-cn.com/problems/longest-increasing-subsequence/) ***
 
-13. #### [72. 编辑距离](https://leetcode-cn.com/problems/edit-distance/) *** 
+13. [198. 打家劫舍](https://leetcode-cn.com/problems/house-robber/) ***
 
-14. #### [62. 不同路径](https://leetcode-cn.com/problems/unique-paths/) ***
+14. #### [213. 打家劫舍 II](https://leetcode-cn.com/problems/house-robber-ii/)
 
-15. #### [279. 完全平方数](https://leetcode-cn.com/problems/perfect-squares/) ***
+15. #### [337. 打家劫舍 III](https://leetcode-cn.com/problems/house-robber-iii/)
+
+16. #### [53. 最大子序和](https://leetcode-cn.com/problems/maximum-subarray/) ***
+
+17. #### [64. 最小路径和](https://leetcode-cn.com/problems/minimum-path-sum/) ***
+
+18. #### [72. 编辑距离](https://leetcode-cn.com/problems/edit-distance/) *** 
+
+19. #### [62. 不同路径](https://leetcode-cn.com/problems/unique-paths/) ***
+
+20. #### [279. 完全平方数](https://leetcode-cn.com/problems/perfect-squares/) ***
 
 # 位运算
 
@@ -258,8 +268,6 @@
 4. 归并排序 sort/MergeSort （nlogn 稳定，非原地排序） *** 
 5. 快速排序 sort/QuickSort （n*logn 不稳定）*** 
 6. 二分查找的变种  com.chen.algorithm.bsearch/AdviceBsearch ***
-
-
 
 # 高频算法题
 

@@ -43,29 +43,66 @@
 
 19. [121. 买卖股票的最佳时机](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/)  [买卖股票升级版](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/solution/yi-ge-fang-fa-tuan-mie-6-dao-gu-piao-wen-ti-by-l-3/)
 
-20. [152. 乘积最大子数组](https://leetcode-cn.com/problems/maximum-product-subarray/)（已处理）
+20. #### [122. 买卖股票的最佳时机 II](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-ii/)
 
-21. #### [2. 两数相加](https://leetcode-cn.com/problems/add-two-numbers/)
+21. #### [188. 买卖股票的最佳时机 IV](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-iv/)
 
-22. #### [415. 字符串相加](https://leetcode-cn.com/problems/add-strings/)
+22. #### [714. 买卖股票的最佳时机含手续费](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/)
 
-23. [15. 三数之和](https://leetcode-cn.com/problems/3sum/)
+23. #### [309. 最佳买卖股票时机含冷冻期](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/)
 
-24. [227. 基本计算器 II](https://leetcode-cn.com/problems/basic-calculator-ii/)
+24. [152. 乘积最大子数组](https://leetcode-cn.com/problems/maximum-product-subarray/)（已处理）
 
-25. #### [34. 在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
+25. #### [2. 两数相加](https://leetcode-cn.com/problems/add-two-numbers/)
 
-26. #### [344. 反转字符串](https://leetcode-cn.com/problems/reverse-string/)
+26. #### [415. 字符串相加](https://leetcode-cn.com/problems/add-strings/)
 
-    
+27. [15. 三数之和](https://leetcode-cn.com/problems/3sum/)
+
+28. [227. 基本计算器 II](https://leetcode-cn.com/problems/basic-calculator-ii/)
+
+29. #### [34. 在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
+
+30. #### [344. 反转字符串](https://leetcode-cn.com/problems/reverse-string/)
+
+
+
 
 1. [72. 编辑距离](https://leetcode-cn.com/problems/edit-distance/)
 
-2. [279. 完全平方数](https://leetcode-cn.com/problems/perfect-squares/) ???
-
 3. #### [69. x 的平方根](https://leetcode-cn.com/problems/sqrtx/)
 
-4. #### [347. 前 K 个高频元素](https://leetcode-cn.com/problems/top-k-frequent-elements/)
+4. #### [11. 盛最多水的容器](https://leetcode-cn.com/problems/container-with-most-water/)
+
+5. #### [347. 前 K 个高频元素](https://leetcode-cn.com/problems/top-k-frequent-elements/)
+
+6. #### [56. 合并区间](https://leetcode-cn.com/problems/merge-intervals/)
+
+9. #### [322. 零钱兑换](https://leetcode-cn.com/problems/coin-change/)
+
+7. #### [78. 子集](https://leetcode-cn.com/problems/subsets/)
+
+8. #### [239. 滑动窗口最大值](https://leetcode-cn.com/problems/sliding-window-maximum/)
+
+9. #### [496. 下一个更大元素 I](https://leetcode-cn.com/problems/next-greater-element-i/)
+
+10. [279. 完全平方数](https://leetcode-cn.com/problems/perfect-squares/) 
+
+11. [343. 整数拆分](https://leetcode-cn.com/problems/integer-break/) 
+
+
+
+#### [剑指 Offer 57 - II. 和为s的连续正数序列](https://leetcode-cn.com/problems/he-wei-sde-lian-xu-zheng-shu-xu-lie-lcof/)
+
+#### [416. 分割等和子集](https://leetcode-cn.com/problems/partition-equal-subset-sum/) 
+
+[518. 零钱兑换 II](https://leetcode-cn.com/problems/coin-change-2/)
+
+[79. 单词搜索](https://leetcode-cn.com/problems/word-search/) 
+
+
+
+
 
 
 
@@ -133,9 +170,8 @@
 
 
 
-区间合并，
 最大岛屿数，
-割绳子，
+
 机器人走格子，
 矩阵中的路径
 
