@@ -44,6 +44,8 @@
 
 17. #### [剑指 Offer 57 - II. 和为s的连续正数序列](https://leetcode-cn.com/problems/he-wei-sde-lian-xu-zheng-shu-xu-lie-lcof/)
 
+18. [674. 最长连续递增序列](https://leetcode-cn.com/problems/longest-continuous-increasing-subsequence) ***
+
 #  链表
 
 1.  [19. 删除链表的倒数第N个节点](https://leetcode-cn.com/problems/remove-nth-node-from-end-of-list/) ***
@@ -102,7 +104,6 @@
 6. [703. 数据流中的第K大元素](https://leetcode-cn.com/problems/kth-largest-element-in-a-stream/) ***
 7. [239. 滑动窗口最大值](https://leetcode-cn.com/problems/sliding-window-maximum/) *** ???
 8. [496. 下一个更大元素 I](https://leetcode-cn.com/problems/next-greater-element-i) ***
-9. [674. 最长连续递增序列](https://leetcode-cn.com/problems/longest-continuous-increasing-subsequence) ***
 
 
 
